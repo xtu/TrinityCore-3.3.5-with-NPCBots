@@ -14601,7 +14601,7 @@ void bot_ai::JustDied(Unit* u)
         Battleground* bg = me->GetMap()->ToBattlegroundMap()->GetBG();
         ASSERT_NOTNULL(bg);
         TeamId my_team = BotDataMgr::GetTeamIdForFaction(me->GetFaction());
-        WorldSafeLocsEntry const* gy = bg->GetClosestGraveyard(*me, my_team == TEAM_HORDE ? HORDE : ALLIANCE);
+        WorldSafeLocsEntry const* gy = bg->GetClosestGraveyardForBot(*me, my_team == TEAM_HORDE ? HORDE : ALLIANCE);
         if (gy)
         {
             Position pos(gy->Loc.X, gy->Loc.Y, gy->Loc.Z, me->GetOrientation());

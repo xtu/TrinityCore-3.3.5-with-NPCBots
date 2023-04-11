@@ -1996,7 +1996,7 @@ void Battleground::HandleBotKillBot(Creature* bot, Creature* victim)
     uint32 team = GetPlayerTeam(bot->GetGUID());
 
     // Add +1 deaths
-    UpdateBotScore(bot, SCORE_DEATHS, 1);
+    UpdateBotScore(victim, SCORE_DEATHS, 1);
     // Add +1 kills to group and +1 killing_blows to killer
     UpdateBotScore(bot, SCORE_HONORABLE_KILLS, 1);
     UpdateBotScore(bot, SCORE_KILLING_BLOWS, 1);
@@ -2007,8 +2007,8 @@ void Battleground::HandleBotKillBot(Creature* bot, Creature* victim)
         {
             if (Creature const* teamedBot = BotDataMgr::FindBot(itr->first.GetEntry()))
             {
-                if (GetPlayerTeam(itr->first) == team && teamedBot->IsInMap(bot) &&
-                    teamedBot->GetDistance(bot) <= sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE))
+                if (GetPlayerTeam(itr->first) == team && teamedBot->IsInMap(victim) &&
+                    teamedBot->GetDistance(victim) <= sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE))
                 {
                     UpdateBotScore(teamedBot, SCORE_HONORABLE_KILLS, 1);
                 }
@@ -2020,7 +2020,7 @@ void Battleground::HandleBotKillBot(Creature* bot, Creature* victim)
         if (!creditedPlayer)
             continue;
 
-        if (creditedPlayer->GetTeam() == team && creditedPlayer->IsAtGroupRewardDistance(bot))
+        if (creditedPlayer->GetTeam() == team && creditedPlayer->IsAtGroupRewardDistance(victim))
             UpdatePlayerScore(creditedPlayer, SCORE_HONORABLE_KILLS, 1);
     }
 }
@@ -2157,7 +2157,7 @@ WorldSafeLocsEntry const* Battleground::GetClosestGraveyard(Player* player)
 }
 
 //npcbot
-WorldSafeLocsEntry const* Battleground::GetClosestGraveyard(WorldLocation const& curPos, uint32 team)
+WorldSafeLocsEntry const* Battleground::GetClosestGraveyardForBot(WorldLocation const& curPos, uint32 team) const
 {
     return sObjectMgr->GetClosestGraveyard(curPos.GetPositionX(), curPos.GetPositionY(), curPos.GetPositionZ(), curPos.GetMapId(), team);
 }
