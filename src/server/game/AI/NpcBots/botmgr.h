@@ -12,9 +12,12 @@ class GameObject;
 class Map;
 class Player;
 class Spell;
+class SpellInfo;
 class Unit;
 class Vehicle;
 class WorldLocation;
+class WorldObject;
+
 class DPSTracker;
 
 struct AreaTriggerEntry;

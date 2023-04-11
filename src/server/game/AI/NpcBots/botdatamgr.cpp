@@ -292,7 +292,6 @@ private:
             //force level range for bgs
             bot_template.minlevel = bracketEntry->MinLevel;
             bot_template.maxlevel = bracketEntry->MaxLevel;
-            bot_template.type_flags |= CREATURE_TYPE_FLAG_TREAT_AS_RAID_UNIT;
         }
         else
             bot_template.flags_extra &= ~(CREATURE_FLAG_EXTRA_NO_XP);
@@ -1128,6 +1127,23 @@ bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unu
     BattlegroundQueueTypeId bgqTypeId = sBattlegroundMgr->BGQueueTypeId(gqinfo->BgTypeId, gqinfo->ArenaType);
     ASSERT(bgqTypeId != BATTLEGROUND_QUEUE_NONE);
 
+    BattlegroundBracketId bracketId = bracketEntry->GetBracketId();
+
+    //find running BG
+    auto const& all_bgs = sBattlegroundMgr->GetBgDataStore();
+    for (auto const& kv : all_bgs)
+    {
+        if (kv.first == gqinfo->BgTypeId)
+        {
+            for (auto const& real_bg_pair : kv.second.m_Battlegrounds)
+            {
+                Battleground const* real_bg = real_bg_pair.second;
+                if (real_bg->GetInstanceID() != 0 && real_bg->GetBracketId() == bracketId)
+                    return true; // This BG is running already
+            }
+        }
+    }
+
     Battleground const* bg_template = sBattlegroundMgr->GetBattlegroundTemplate(gqinfo->BgTypeId);
 
     if (!bg_template)
@@ -1141,8 +1157,6 @@ bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unu
 
     [[maybe_unused]] uint32 minlevel = bracketEntry->MinLevel;
     [[maybe_unused]] uint32 maxlevel = bracketEntry->MaxLevel;
-
-    uint8 bracketId = uint8(bracketEntry->GetBracketId());
 
     uint32 queued_players_a = 0;
     uint32 queued_players_h = 0;
