@@ -1244,7 +1244,7 @@ WorldSafeLocsEntry const* BattlegroundWS::GetClosestGraveyard(Player* player)
 }
 
 //npcbot
-WorldSafeLocsEntry const* BattlegroundWS::GetClosestGraveyard(WorldLocation const* /*curPos*/, uint32 team)
+WorldSafeLocsEntry const* BattlegroundWS::GetClosestGraveyard(WorldLocation const& /*curPos*/, uint32 team)
 {
     if (team == ALLIANCE)
     {

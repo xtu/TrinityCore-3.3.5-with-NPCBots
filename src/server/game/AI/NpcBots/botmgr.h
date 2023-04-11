@@ -11,15 +11,19 @@ class Creature;
 class GameObject;
 class Map;
 class Player;
+class Spell;
 class Unit;
 class Vehicle;
 class WorldLocation;
 class DPSTracker;
 
+struct AreaTriggerEntry;
+struct CleanDamage;
 struct GroupQueueInfo;
 struct Position;
 
 enum CurrentSpellTypes : uint8;
+enum DamageEffectType : uint8;
 
 constexpr size_t TargetIconNamesCacheSize = 8u; // Group.h TARGETICONCOUNT
 
@@ -95,6 +99,7 @@ class TC_GAME_API BotMgr
         static bool IsPvPEnabled();
         static bool IsFoodInterruptedByMovement();
         static bool FilterRaces();
+        static bool IsBotGenerationEnabledBGs();
         static uint8 GetMaxClassBots();
         static uint8 GetHealTargetIconFlags();
         static uint8 GetTankTargetIconFlags();
@@ -113,6 +118,9 @@ class TC_GAME_API BotMgr
         static float GetBotDamageModSpell();
         static float GetBotHealingMod();
         static float GetBotHPMod();
+        static float GetBotWandererDamageMod();
+        static float GetBotWandererHealingMod();
+        static float GetBotWandererHPMod();
         static float GetBotDamageModByClass(uint8 botclass);
 
         static void Initialize();
@@ -161,6 +169,7 @@ class TC_GAME_API BotMgr
         static int32 GetBotInfoPacketsLimit();
         static bool LimitBots(Map const* map);
         static bool CanBotParryWhileCasting(Creature const* bot);
+        static bool IsWanderingWorldBot(Creature const* bot);
         bool RestrictBots(Creature const* bot, bool add) const;
         bool IsPartyInCombat() const;
         bool HasBotClass(uint8 botclass) const;

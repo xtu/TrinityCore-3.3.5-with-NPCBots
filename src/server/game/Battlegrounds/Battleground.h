@@ -463,7 +463,7 @@ class TC_GAME_API Battleground
         //npcbot
         virtual void AddBot(Creature* bot);
         void AddOrSetBotToCorrectBgGroup(Creature* bot, uint32 team);
-        virtual WorldSafeLocsEntry const* GetClosestGraveyard(WorldLocation const* curPos, uint32 team);
+        virtual WorldSafeLocsEntry const* GetClosestGraveyard(WorldLocation const& curPos, uint32 team);
         TeamId GetPlayerTeamId(ObjectGuid guid) const;
         //end npcbot
 

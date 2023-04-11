@@ -1464,7 +1464,7 @@ bool Battleground::UpdatePlayerScore(Player* player, uint32 type, uint32 value, 
 }
 
 //npcbot
-bool Battleground::UpdateBotScore(Creature const* bot, uint32 type, uint32 value, bool doAddHonor)
+bool Battleground::UpdateBotScore(Creature const* bot, uint32 type, uint32 value, bool /*doAddHonor*/)
 {
     BattlegroundScoreMap::const_iterator itr = BotScores.find(bot->GetEntry());
     if (itr == BotScores.end()) // bot not found...
@@ -2157,9 +2157,9 @@ WorldSafeLocsEntry const* Battleground::GetClosestGraveyard(Player* player)
 }
 
 //npcbot
-WorldSafeLocsEntry const* Battleground::GetClosestGraveyard(WorldLocation const* curPos, uint32 team)
+WorldSafeLocsEntry const* Battleground::GetClosestGraveyard(WorldLocation const& curPos, uint32 team)
 {
-    return sObjectMgr->GetClosestGraveyard(curPos->GetPositionX(), curPos->GetPositionY(), curPos->GetPositionZ(), curPos->GetMapId(), team);
+    return sObjectMgr->GetClosestGraveyard(curPos.GetPositionX(), curPos.GetPositionY(), curPos.GetPositionZ(), curPos.GetMapId(), team);
 }
 //end npcbot
 
