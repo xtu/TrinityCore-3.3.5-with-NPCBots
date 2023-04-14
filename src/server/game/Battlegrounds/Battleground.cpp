@@ -805,17 +805,14 @@ void Battleground::EndBattleground(uint32 winner)
 
     BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(GetTypeID(), GetArenaType());
 
-    //npcbot: despawn generated bots immediately
+    //npcbot: remove/despawn bots immediately
     BattlegroundPlayerMap::iterator bitr, bnext;
     for (bitr = m_Players.begin(); bitr != m_Players.end(); bitr = bnext)
     {
         bnext = bitr;
         ++bnext;
         if (bitr->first.IsCreature())
-        {
-            if (Creature const* bot = BotDataMgr::FindBot(bitr->first.GetEntry()))
-                RemovePlayerAtLeave(bitr->first, true, true);
-        }
+            RemovePlayerAtLeave(bitr->first, true, true);
     }
     //end npcbot
 
