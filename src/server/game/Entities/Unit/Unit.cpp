@@ -892,8 +892,9 @@ bool Unit::HasBreakableByDamageCrowdControlAura(Unit* excludeCasterChannel) cons
             if (victim->GetTypeId() == TYPEID_PLAYER)
                 if (Battleground* bg = killer->GetBattleground())
                     bg->UpdatePlayerScore(killer, SCORE_DAMAGE_DONE, damage);
+
             //npcbot
-            else if (victim->IsNPCBot())
+            if (victim->IsNPCBot())
                 if (Battleground* bg = killer->GetBattleground())
                     bg->UpdatePlayerScore(killer, SCORE_DAMAGE_DONE, damage);
             //end npcbot
