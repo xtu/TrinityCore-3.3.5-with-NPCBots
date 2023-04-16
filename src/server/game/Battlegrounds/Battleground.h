@@ -430,6 +430,7 @@ class TC_GAME_API Battleground
         //npcbot
         uint32 GetBotScoresSize() const { return BotScores.size(); }
         TeamId GetPlayerTeamId(ObjectGuid guid) const;
+        TeamId GetOtherTeamId(TeamId teamId) const;
         void AddOrSetBotToCorrectBgGroup(Creature* bot, uint32 team);
         virtual void AddBot(Creature* bot);
         virtual WorldSafeLocsEntry const* GetClosestGraveyardForBot(WorldLocation const& curPos, uint32 team) const;

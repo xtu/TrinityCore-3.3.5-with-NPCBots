@@ -386,11 +386,7 @@ inline void Battleground::_ProcessResurrect(uint32 diff)
             if (itr->IsCreature())
             {
                 if (Creature const* cbot = BotDataMgr::FindBot(itr->GetEntry()))
-                {
-                    Creature* bot = const_cast<Creature*>(cbot);
-                    ASSERT(bot->IsInWorld());
-                    BotMgr::ReviveBot(bot);
-                }
+                    BotMgr::ReviveBot(const_cast<Creature*>(cbot));
                 continue;
             }
             //end npcbot
@@ -980,6 +976,7 @@ void Battleground::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
             const_cast<Creature*>(bot)->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
         const_cast<Creature*>(bot)->RemoveAurasByType(SPELL_AURA_MOUNTED);
 
+        bot->GetBotAI()->SetBG(nullptr);
         if (bot->IsWandererBot())
         {
             bot->GetBotAI()->canUpdate = false;
@@ -1206,6 +1203,7 @@ void Battleground::AddBot(Creature* bot)
     // setup BG group membership
     AddOrSetBotToCorrectBgGroup(bot, team);
 
+    bot->GetBotAI()->SetBG(this);
     if (GetStatus() != STATUS_IN_PROGRESS && bot->IsWandererBot())
         bot->GetBotAI()->SetBotCommandState(BOT_COMMAND_STAY);
 }
@@ -2059,6 +2057,11 @@ TeamId Battleground::GetPlayerTeamId(ObjectGuid guid) const
         default:
             return TEAM_NEUTRAL;
     }
+}
+
+TeamId Battleground::GetOtherTeamId(TeamId teamId) const
+{
+    return (teamId == TEAM_ALLIANCE) ? TEAM_HORDE : (teamId == TEAM_HORDE) ? TEAM_ALLIANCE : teamId;
 }
 //end npcbot
 
