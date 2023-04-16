@@ -2053,6 +2053,9 @@ TeamId Battleground::GetPlayerTeamId(ObjectGuid guid) const
             return TEAM_ALLIANCE;
         case HORDE:
             return TEAM_HORDE;
+        case TEAM_ALLIANCE:
+        case TEAM_HORDE:
+            return TeamId(team);
         default:
             return TEAM_NEUTRAL;
     }
