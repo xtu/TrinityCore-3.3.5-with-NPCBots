@@ -313,6 +313,15 @@ class BattlegroundAB : public Battleground
         void EndBattleground(uint32 winner) override;
         WorldSafeLocsEntry const* GetClosestGraveyard(Player* player) override;
 
+        //npcbot
+        void AddBot(Creature* bot) override;
+        //void RemoveBot(ObjectGuid guid) override;
+        bool UpdateBotScore(Creature const* bot, uint32 type, uint32 value, bool /*doAddHonor*/) override;
+        void HandleBotKillPlayer(Creature* killer, Player* victim) override;
+        void HandleBotKillBot(Creature* killer, Creature* victim) override;
+        void HandlePlayerKillBot(Creature* victim, Player* killer) override;
+        //end npcbot
+
         /* Scorekeeping */
         bool UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor = true) override;
 
