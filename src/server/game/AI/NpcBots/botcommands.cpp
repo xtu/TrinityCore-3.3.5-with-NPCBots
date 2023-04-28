@@ -2753,7 +2753,7 @@ public:
             return false;
         }
 
-        if (!(creInfo->flags_extra & CREATURE_FLAG_EXTRA_NPCBOT))
+        if (!creInfo->IsNPCBot())
         {
             handler->PSendSysMessage("creature id %u is not a npcbot!", id);
             handler->SetSentErrorMessage(true);
@@ -2942,7 +2942,7 @@ public:
             return false;
         }
 
-        if (!(creInfo->flags_extra & CREATURE_FLAG_EXTRA_NPCBOT))
+        if (!creInfo->IsNPCBot())
         {
             handler->PSendSysMessage("creature %u is not a npcbot!", id);
             handler->SetSentErrorMessage(true);
