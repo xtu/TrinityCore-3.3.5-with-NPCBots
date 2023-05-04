@@ -2206,11 +2206,11 @@ public:
                         break;
                     }
                 }
-                if (!found)
-                {
-                    TC_LOG_ERROR("entities.unit", "Shaman_bot:SummonedCreatureDespawn() wolf is not found in array");
-                    ASSERT(false);
-                }
+                //if (!found)
+                //{
+                //    TC_LOG_ERROR("entities.unit", "Shaman_bot:SummonedCreatureDespawn() wolf is not found in array");
+                //    ASSERT(false);
+                //}
             }
         }
 
