@@ -330,7 +330,7 @@ private:
         ASSERT(c.IsCoordValid(), "Invalid Cell coord!");
         ASSERT(g.IsCoordValid(), "Invalid Grid coord!");
         Map* map = sMapMgr->CreateBaseMap(spawnLoc->GetMapId());
-        ASSERT(map->GetEntry()->IsContinent() || map->GetEntry()->IsBattlegroundOrArena(), map->GetDebugInfo().c_str());
+        ASSERT(map->GetEntry()->IsContinent() || map->GetEntry()->IsBattlegroundOrArena(), "%s", map->GetDebugInfo().c_str());
 
         if (immediate)
             SpawnWandererBot(next_bot_id, spawnLoc, registry);
@@ -1108,7 +1108,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
                         ss << '-';
                 }
                 ss << " is isolated!";
-                TC_LOG_INFO("server.loading", ss.str().c_str());
+                TC_LOG_INFO("server.loading", "%s", ss.str().c_str());
             }
         }
     });
