@@ -325,7 +325,7 @@ void BotMgr::LoadConfig(bool reload)
     {
         Optional<float> val = Trinity::StringTo<float>(toks[i]);
         if (val == std::nullopt)
-            TC_LOG_ERROR("server.loading", "NpcBot.Mult.Damage.Levels contains invalid float value '%s', set to default", toks[i]);
+            TC_LOG_ERROR("server.loading", "NpcBot.Mult.Damage.Levels contains invalid float value '%s', set to default", std::string(toks[i]).c_str());
         float fval = val.value_or(1.0f);
         RoundToInterval(fval, 0.1f, 10.f);
         _mult_dmg_levels.push_back(fval);
