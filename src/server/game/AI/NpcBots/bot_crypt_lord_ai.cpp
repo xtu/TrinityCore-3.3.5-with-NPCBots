@@ -313,7 +313,7 @@ public:
                 {
                     Spell const* tarSpell = mytar->GetCurrentSpell(CURRENT_GENERIC_SPELL);
                     tarSpell = tarSpell ? tarSpell : mytar->GetCurrentSpell(CURRENT_CHANNELED_SPELL);
-                    if (!tarSpell || tarSpell->GetTimer() > 500u)
+                    if (!tarSpell || tarSpell->GetTimer() > 500)
                     {
                         if (doCast(mytar, GetSpell(IMPALE_1)))
                             return;
