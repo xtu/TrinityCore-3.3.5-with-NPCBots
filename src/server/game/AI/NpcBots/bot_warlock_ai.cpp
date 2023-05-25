@@ -739,7 +739,7 @@ public:
             StartAttack(mytar, IsMelee());
 
             CheckAttackState();
-            if (!me->IsAlive())
+            if (!me->IsAlive() || !mytar->IsAlive())
                 return;
 
             MoveBehind(mytar);
@@ -1779,6 +1779,7 @@ public:
             myPet->SetFaction(master->GetFaction());
             myPet->SetControlledByPlayer(!IAmFree());
             myPet->SetPvP(me->IsPvP());
+            myPet->SetPvpFlag(me->GetPvpFlags());
             myPet->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
             myPet->SetByteValue(UNIT_FIELD_BYTES_2, 1, master->GetByteValue(UNIT_FIELD_BYTES_2, 1));
 

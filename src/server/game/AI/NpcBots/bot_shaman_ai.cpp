@@ -1054,7 +1054,7 @@ public:
             StartAttack(mytar, IsMelee());
 
             CheckAttackState();
-            if (!me->IsAlive())
+            if (!me->IsAlive() || !mytar->IsAlive())
                 return;
 
             auto [can_do_frost, can_do_fire, can_do_nature] = CanAffectVictimBools(mytar, SPELL_SCHOOL_FROST, SPELL_SCHOOL_FIRE, SPELL_SCHOOL_NATURE);
@@ -2160,6 +2160,7 @@ public:
                 myPet->SetFaction(master->GetFaction());
                 myPet->SetControlledByPlayer(!IAmFree());
                 myPet->SetPvP(me->IsPvP());
+                myPet->SetPvpFlag(me->GetPvpFlags());
                 myPet->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
                 myPet->SetByteValue(UNIT_FIELD_BYTES_2, 1, master->GetByteValue(UNIT_FIELD_BYTES_2, 1));
                 myPet->SetUInt32Value(UNIT_CREATED_BY_SPELL, FERAL_SPIRIT_1);
@@ -2388,6 +2389,7 @@ public:
             summon->SetDisplayId(sObjectMgr->GetModelForTotem(SummonSlot(slot+1), Races(me->GetRace())));
             summon->SetFaction(me->GetFaction());
             summon->SetPvP(me->IsPvP());
+            summon->SetPvpFlag(me->GetPvpFlags());
             summon->SetOwnerGUID(master->GetGUID());
             summon->SetControlledByPlayer(!IAmFree());
             summon->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
