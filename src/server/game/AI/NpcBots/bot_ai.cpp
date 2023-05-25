@@ -13679,7 +13679,6 @@ void bot_ai::DefaultInit()
     me->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
 
     me->SetPvP(master->IsPvP() || IsWanderer());
-    me->SetPvpFlag(master->GetPvpFlags());
     if (sWorld->IsFFAPvPRealm())
         me->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
     else if (IAmFree())

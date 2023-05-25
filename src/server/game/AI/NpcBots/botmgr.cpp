@@ -938,7 +938,6 @@ void BotMgr::_reviveBot(Creature* bot, WorldLocation* dest)
     bot->SetLootRecipient(nullptr);
     bot->ResetPlayerDamageReq();
     bot->SetPvP(bot->GetBotOwner()->IsPvP());
-    bot->SetPvpFlag(bot->GetBotOwner()->GetPvpFlags());
     bot->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
     bot->Motion_Initialize();
     bot->setDeathState(ALIVE);

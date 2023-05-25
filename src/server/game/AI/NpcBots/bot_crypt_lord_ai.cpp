@@ -583,7 +583,6 @@ public:
             myPet->SetFaction(master->GetFaction());
             myPet->SetControlledByPlayer(!IAmFree());
             myPet->SetPvP(me->IsPvP());
-            myPet->SetPvpFlag(me->GetPvpFlags());
             myPet->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
             myPet->SetByteValue(UNIT_FIELD_BYTES_2, 1, master->GetByteValue(UNIT_FIELD_BYTES_2, 1));
 
@@ -618,7 +617,6 @@ public:
             locust->SetFaction(master->GetFaction());
             locust->SetControlledByPlayer(!IAmFree());
             locust->SetPvP(me->IsPvP());
-            locust->SetPvpFlag(me->GetPvpFlags());
             locust->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
             locust->SetByteValue(UNIT_FIELD_BYTES_2, 1, master->GetByteValue(UNIT_FIELD_BYTES_2, 1));
 
