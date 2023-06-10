@@ -263,6 +263,7 @@ bot_ai::bot_ai(Creature* creature) : CreatureAI(creature)
     _wmoAreaUpdateTimer = 0;
 
     _contestedPvPTimer = 0;
+    _groupUpdateTimer = BOT_GROUP_UPDATE_TIMER;
 
     _ownerGuid = 0;
 
@@ -270,6 +271,10 @@ bot_ai::bot_ai(Creature* creature) : CreatureAI(creature)
     _baseLevel = 0;
     _travel_node_last = nullptr;
     _travel_node_cur = nullptr;
+
+    _groupUpdateMask = 0;
+    _auraRaidUpdateMask = 0;
+    _group = nullptr;
     _bg = nullptr;
 
     opponent = nullptr;
@@ -6887,6 +6892,8 @@ void bot_ai::_OnZoneUpdate(uint32 zoneId, uint32 areaId)
     ASSERT(me->IsInWorld());
 
     _lastZoneId = zoneId;
+
+    SetGroupUpdateFlag(GROUP_UPDATE_FULL);
 
     _OnAreaUpdate(areaId);
 
@@ -16569,6 +16576,15 @@ uint8 bot_ai::LivingVehiclesCount(uint32 entry) const
     return count;
 }
 //GLOBAL UPDATE
+void bot_ai::UpdateDeadAI(uint32 diff)
+{
+    // group update
+    if (_groupUpdateTimer <= diff)
+    {
+        SendUpdateToOutOfRangeBotGroupMembers();
+        _groupUpdateTimer = BOT_GROUP_UPDATE_TIMER;
+    }
+}
 //opponent unsafe
 bool bot_ai::GlobalUpdate(uint32 diff)
 {
@@ -16667,6 +16683,13 @@ bool bot_ai::GlobalUpdate(uint32 diff)
     {
         doMana = false;
         _OnManaUpdate();
+    }
+
+    // group update
+    if (_groupUpdateTimer <= diff)
+    {
+        SendUpdateToOutOfRangeBotGroupMembers();
+        _groupUpdateTimer = BOT_GROUP_UPDATE_TIMER;
     }
 
     if (ordersTimer <= diff)
@@ -17287,6 +17310,9 @@ void bot_ai::CommonTimers(uint32 diff)
     }
 
     if (_contestedPvPTimer > diff)  _contestedPvPTimer -= diff;
+
+    if (_groupUpdateTimer > diff)   _groupUpdateTimer -= diff;
+    else if (_groupUpdateTimer)     _groupUpdateTimer = 0;
 
     if (_updateTimerMedium > diff)  _updateTimerMedium -= diff;
     if (_updateTimerEx1 > diff)     _updateTimerEx1 -= diff;
@@ -18795,6 +18821,19 @@ void bot_ai::UpdateContestedPvP()
 {
     if (_contestedPvPTimer > 0 && _contestedPvPTimer <= lastdiff && !me->IsInCombat())
         ResetContestedPvP();
+}
+
+void bot_ai::SendUpdateToOutOfRangeBotGroupMembers()
+{
+    if (_groupUpdateMask == GROUP_UPDATE_FLAG_NONE)
+        return;
+    if (Group* group = GetGroup())
+        group->UpdateBotOutOfRange(me);
+
+    _groupUpdateMask = GROUP_UPDATE_FLAG_NONE;
+    _auraRaidUpdateMask = 0;
+    if (botPet)
+        botPet->GetBotPetAI()->ResetAuraUpdateMaskForRaid();
 }
 
 //BATTLEGROUNDS
