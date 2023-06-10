@@ -1963,7 +1963,7 @@ void Group::SendUpdateToPlayer(ObjectGuid playerGUID, MemberSlot* slot)
         onlineState = onlineState | ((isBGGroup() || isBFGroup()) ? MEMBER_STATUS_PVP : 0);
 
         //npcbot: bots are always online
-        onlineState |= citr->guid.IsCreature();
+        onlineState |= citr->guid.IsCreature() ? 1 : 0;
         //end npcbot
 
         data << citr->name;
