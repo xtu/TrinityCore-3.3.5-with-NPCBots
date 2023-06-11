@@ -359,11 +359,32 @@ private:
 public:
     uint32 GetEnabledBotsCount() const { return enabledBotsCount; }
 
-    uint32 GetSpareBotsCount() const
+    uint32 GetSpareBotsCount(TeamId teamId = TEAM_NEUTRAL) const
     {
         uint32 count = 0;
         for (auto const& kv : _spareBotIdsPerClassMap)
-            count += kv.second.size();
+        {
+            if (teamId == TEAM_NEUTRAL)
+                count += kv.second.size();
+            else
+            {
+                if (kv.first >= BOT_CLASS_EX_START)
+                {
+                    auto cit = wbot_faction_for_ex_class.find(kv.first);
+                    if (cit != wbot_faction_for_ex_class.cend() && cit->second == FACTION_MONSTER)
+                        continue;
+                }
+
+                for (uint32 entry : kv.second)
+                {
+                    NpcBotExtras const* extras = ASSERT_NOTNULL(BotDataMgr::SelectNpcBotExtras(entry));
+                    uint32 bot_faction = GetDefaultFactionForRaceClass(kv.first, extras->race);
+                    TeamId bot_team = BotDataMgr::GetTeamIdForFaction(bot_faction);
+                    if (teamId == bot_team)
+                        ++count;
+                }
+            }
+        }
         return count;
     }
 
@@ -1251,15 +1272,6 @@ bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unu
         return true;
     }
 
-    uint32 spareBots = sBotGen->GetSpareBotsCount();
-
-    if (spareBots == 0)
-    {
-        TC_LOG_WARN("npcbots", "[No spare bots] Failed to generate bots for BG %u inited by player %s (%u)",
-            uint32(gqinfo->BgTypeId), groupLeader->GetName().c_str(), groupLeader->GetGUID().GetCounter());
-        return false;
-    }
-
     //find running BG
     auto const& all_bgs = sBattlegroundMgr->GetBgDataStore();
     for (auto const& kv : all_bgs)
@@ -1316,12 +1328,24 @@ bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unu
         return true;
     }
 
-    if (spareBots < needed_bots_count_a + needed_bots_count_h)
+    uint32 spare_bots_a = sBotGen->GetSpareBotsCount(TEAM_ALLIANCE);
+    uint32 spare_bots_h = sBotGen->GetSpareBotsCount(TEAM_HORDE);
+
+    if (queued_players_a + spare_bots_a < minteamplayers)
     {
-        TC_LOG_INFO("npcbots", "[Not enough spare bots] Failed to generate bots for BG %u inited by player %s (%u)",
+        TC_LOG_INFO("npcbots", "[Not enough A bots] Failed to generate bots for BG %u inited by player %s (%u)",
             uint32(bgTypeId), groupLeader->GetName().c_str(), groupLeader->GetGUID().GetCounter());
         return false;
     }
+    if (queued_players_h + spare_bots_h < minteamplayers)
+    {
+        TC_LOG_INFO("npcbots", "[Not enough H bots] Failed to generate bots for BG %u inited by player %s (%u)",
+            uint32(bgTypeId), groupLeader->GetName().c_str(), groupLeader->GetGUID().GetCounter());
+        return false;
+    }
+
+    needed_bots_count_a = std::min<uint32>(needed_bots_count_a, spare_bots_a);
+    needed_bots_count_h = std::min<uint32>(needed_bots_count_h, spare_bots_h);
 
     uint32 spawned_a = 0;
     uint32 spawned_h = 0;
@@ -1334,13 +1358,12 @@ bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unu
         {
             TC_LOG_WARN("npcbots", "Failed to spawn %u ALLIANCE bots for BG %u '%s' queued A %u H %u req A %u H %u spare %u",
                 needed_bots_count_a, uint32(bg_template->GetTypeID()), bg_template->GetName().c_str(),
-                queued_players_a, queued_players_h, needed_bots_count_a, needed_bots_count_h, spareBots);
+                queued_players_a, queued_players_h, needed_bots_count_a, needed_bots_count_h, spare_bots_a);
             for (NpcBotRegistry const* registry1 : { &spawned_bots_a, &spawned_bots_h })
                 for (Creature const* bot : *registry1)
                     DespawnWandererBot(bot->GetEntry());
             return false;
         }
-        spareBots = sBotGen->GetSpareBotsCount();
     }
     if (needed_bots_count_h)
     {
@@ -1348,7 +1371,7 @@ bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unu
         {
             TC_LOG_WARN("npcbots", "Failed to spawn %u HORDE bots for BG %u '%s' queued A %u H %u req A %u H %u spare %u",
                 needed_bots_count_h, uint32(bg_template->GetTypeID()), bg_template->GetName().c_str(),
-                queued_players_a, queued_players_h, needed_bots_count_a, needed_bots_count_h, spareBots);
+                queued_players_a, queued_players_h, needed_bots_count_a, needed_bots_count_h, spare_bots_h);
             for (NpcBotRegistry const* registry2 : { &spawned_bots_a, &spawned_bots_h })
                 for (Creature const* bot : *registry2)
                     DespawnWandererBot(bot->GetEntry());
