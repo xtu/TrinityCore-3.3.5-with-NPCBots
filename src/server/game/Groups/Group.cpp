@@ -702,10 +702,10 @@ bool Group::RemoveMember(ObjectGuid guid, RemoveMethod const& method /*= GROUP_R
             // Remove bot from group in DB
             if (!isBGGroup() && !isBFGroup())
             {
+                //DELETE FROM characters_npcbot_group_member WHERE entry = ?, CONNECTION_ASYNC
                 CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_NPCBOT_GROUP_MEMBER);
                 stmt->setUInt32(0, guid.GetEntry());
                 CharacterDatabase.Execute(stmt);
-                DelinkMember(guid);
             }
 
             // Update subgroup
