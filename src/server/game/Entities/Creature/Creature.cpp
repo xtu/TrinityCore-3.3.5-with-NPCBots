@@ -1340,11 +1340,8 @@ void Creature::SetLootRecipient(Unit* unit, bool withGroup)
     */
     //npcbot - loot recipient of bot's vehicle is owner
     Player* player = nullptr;
-    if (unit->IsVehicle() && unit->GetCharmerGUID().IsCreature() && unit->GetCreatorGUID().IsPlayer())
-    {
-        if (Unit* uowner = unit->GetCreator())
-            player = uowner->ToPlayer();
-    }
+    if (unit->IsVehicle() && unit->GetCharmerGUID().IsCreature() && unit->GetCreator() && unit->GetCreator()->IsPlayer())
+        player = unit->GetCreator()->ToPlayer();
     else
         player = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
     //end npcbot
@@ -2509,6 +2506,11 @@ bool Creature::CanAssistTo(Unit const* u, Unit const* enemy, bool checkfaction /
     // only free creature
     if (GetCharmerOrOwnerGUID())
         return false;
+
+    //npcbot
+    if (IsNPCBotOrPet())
+        return false;
+    //end npcbot
 
     // only from same creature faction
     if (checkfaction)

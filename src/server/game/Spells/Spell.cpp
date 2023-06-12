@@ -2370,6 +2370,10 @@ void Spell::TargetInfo::PreprocessTarget(Spell* spell)
         // but respect current pvp rules (buffing/healing npcs flagged for pvp only flags you if they are in combat)
         if (unit->IsPvP() && (unit->IsInCombat() || unit->IsCharmedOwnedByPlayerOrPlayer()) && spell->m_caster->GetTypeId() == TYPEID_PLAYER)
             _enablePVP = true; // Decide on PvP flagging now, but act on it later.
+        //npcbot
+        else if (unit->IsPvP() && (unit->IsInCombat() || unit->IsNPCBotOrPet()) && spell->m_caster->GetTypeId() == TYPEID_PLAYER)
+            _enablePVP = true; // Decide on PvP flagging now, but act on it later.
+        //end npcbot
 
         SpellMissInfo missInfo = spell->PreprocessSpellHit(_spellHitTarget, ScaleAura, *this);
         if (missInfo != SPELL_MISS_NONE)
@@ -6133,7 +6137,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* param1 /*= nullptr*/, uint
                         return SPELL_FAILED_CHARMED;
  
                     //npcbot: do not allow to charm owned npcbots
-                    if (target->GetCreatorGUID() && target->GetCreatorGUID().IsPlayer())
+                    if (target->GetCreator() && target->GetCreator()->IsPlayer())
                         return SPELL_FAILED_TARGET_IS_PLAYER_CONTROLLED;
                     else if (target->IsNPCBotOrPet())
                         return SPELL_FAILED_CANT_BE_CHARMED;
