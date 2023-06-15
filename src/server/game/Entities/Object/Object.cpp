@@ -3036,6 +3036,11 @@ bool WorldObject::IsValidAttackTarget(WorldObject const* target, SpellInfo const
     }
     //end npcbot
 
+    //npcbot
+    if (unit && unitTarget && (unit->IsNPCBotOrPet() || unitTarget->IsNPCBotOrPet()))
+    {}
+    else
+    //end npcbot
     // CvC case - can attack each other only when one of them is hostile
     if (unit && !unit->HasUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED) && unitTarget && !unitTarget->HasUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED))
         return IsHostileTo(unitTarget) || unitTarget->IsHostileTo(this);
