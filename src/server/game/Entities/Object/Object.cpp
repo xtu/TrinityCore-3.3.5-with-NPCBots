@@ -2800,30 +2800,6 @@ ReputationRank WorldObject::GetReactionTo(WorldObject const* target) const
                     }
                 }
             }
-            ////npcbot: contested guards reaction to bots in contested PvP mode
-            //else if (GetTypeId() == TYPEID_UNIT)
-            //{
-            //    Unit const* bot = IsNPCBotPet() ? ToUnit()->GetCreator() : ToUnit();
-            //    if (bot && bot->IsNPCBot())
-            //    {
-            //        if (FactionTemplateEntry const* targetFactionTemplateEntry = targetUnit->GetFactionTemplateEntry())
-            //        {
-            //            if (FactionEntry const* targetFactionEntry = sFactionStore.LookupEntry(targetFactionTemplateEntry->Faction))
-            //            {
-            //                if (targetFactionEntry->CanHaveReputation())
-            //                {
-            //                    // check contested flags
-            //                    if (targetFactionTemplateEntry->Flags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD)
-            //                    {
-            //                        if (BotMgr::IsBotContestedPvP(bot->ToCreature()))
-            //                            return REP_HOSTILE;
-            //                    }
-            //                    return REP_FRIENDLY;
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
         }
     }
 
@@ -2847,6 +2823,16 @@ ReputationRank WorldObject::GetReactionTo(WorldObject const* target) const
         if ((factionTemplateEntry->Flags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD) &&
             targetPlayerOwner->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP))
             return REP_HOSTILE;
+
+        //npcbot
+        if (target->IsNPCBotOrPet() && (factionTemplateEntry->Flags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD))
+        {
+            Unit const* bot = target->IsNPCBotPet() ? static_cast<Unit*>(targetPlayerOwner->GetBotMgr()->GetBot(target->GetOwnerGUID())) : target->ToUnit();
+            if (bot && bot->IsNPCBot() && BotMgr::IsBotContestedPvP(bot->ToCreature()))
+                return REP_HOSTILE;
+        }
+        //end npcbot
+
         if (ReputationRank const* repRank = targetPlayerOwner->GetReputationMgr().GetForcedRankIfAny(factionTemplateEntry))
             return *repRank;
         if (target->IsUnit() && !target->ToUnit()->HasUnitFlag2(UNIT_FLAG2_IGNORE_REPUTATION))
@@ -2865,17 +2851,11 @@ ReputationRank WorldObject::GetReactionTo(WorldObject const* target) const
         }
     }
     //npcbot: contested guards reaction to bots in contested PvP mode
-    else if (target->GetTypeId() == TYPEID_UNIT)
+    else if (target->IsNPCBotOrPet() && (factionTemplateEntry->Flags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD))
     {
         Unit const* bot = target->IsNPCBotPet() ? target->ToUnit()->GetCreator() : target->ToUnit();
-        if (bot && bot->IsNPCBot())
-        {
-            if (factionTemplateEntry->Flags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD)
-            {
-                if (BotMgr::IsBotContestedPvP(bot->ToCreature()))
-                    return REP_HOSTILE;
-            }
-        }
+        if (bot && bot->IsNPCBot() && BotMgr::IsBotContestedPvP(bot->ToCreature()))
+            return REP_HOSTILE;
     }
     //end npcbot
 
