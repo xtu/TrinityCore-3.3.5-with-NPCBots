@@ -3973,7 +3973,7 @@ void Spell::finish(bool ok)
         creatureCaster->ReleaseSpellFocus(this);
 
     //npcbot
-    if (unitCaster->IsNPCBotOrPet())
+    if (!ok && unitCaster->IsNPCBotOrPet())
         BotMgr::OnBotSpellGo(unitCaster, this, false);
     //end npcbot
 
