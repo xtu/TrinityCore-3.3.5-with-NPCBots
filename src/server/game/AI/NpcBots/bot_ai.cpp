@@ -18036,9 +18036,9 @@ WanderNode const* bot_ai::GetNextBGTravelNode() const
                 std::pair<uint8, WanderNode const*> defNode{};
                 NodeList assdlist;
                 NodeList assalist;
-                std::unordered_set<std::pair<uint8, BG_AV_NodeInfo const*>> defendable_nodes;
-                std::unordered_set<std::pair<uint32, BG_AV_NodeInfo const*>> assaulted_nodes;
-                std::unordered_set<std::pair<uint32, BG_AV_NodeInfo const*>> assaultable_nodes;
+                std::set<std::pair<uint8, BG_AV_NodeInfo const*>> defendable_nodes;
+                std::set<std::pair<uint32, BG_AV_NodeInfo const*>> assaulted_nodes;
+                std::set<std::pair<uint32, BG_AV_NodeInfo const*>> assaultable_nodes;
                 NodeList accessible_nodes = links; //copy
                 accessible_nodes.push_back(curNode);
                 for (BG_AV_Nodes counter = BG_AV_NODES_FIRSTAID_STATION; counter < BG_AV_NODES_MAX; ++counter)
