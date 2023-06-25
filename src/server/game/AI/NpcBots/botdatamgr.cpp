@@ -1538,7 +1538,7 @@ void BotDataMgr::CreateWanderingBotsSortedGear()
             if (c == BOT_CLASS_SPHYNX &&
                 (itt.InventoryType == INVTYPE_FINGER || itt.InventoryType == INVTYPE_TRINKET || itt.InventoryType == INVTYPE_CLOAK || itt.InventoryType == INVTYPE_NECK || itt.InventoryType == INVTYPE_SHIELD))
                 continue;
-            if (!itt.AllowableClass || !!(itt.AllowableClass & ((1u << MAX_CLASSES) - 1)) || !!(itt.AllowableClass & (1 << (c - 1))))
+            if (!itt.AllowableClass || itt.AllowableClass >= ((1u << MAX_CLASSES) - 1) || !!(itt.AllowableClass & (1 << (c - 1))))
                 _botsWanderCreaturesSortedGear[c][slot][lstep].push_back(itt.ItemId);
         }
     };
@@ -1721,6 +1721,8 @@ void BotDataMgr::CreateWanderingBotsSortedGear()
             case ITEM_CLASS_WEAPON:
                 if (proto.Damage[0].DamageMin < 1.0f || proto.Damage[0].DamageMax < 2.0f || proto.Delay < 1000)
                     break;
+                if (proto.RequiredLevel > 75 && proto.Quality < ITEM_QUALITY_EPIC)
+                    break;
                 switch (proto.SubClass)
                 {
                     case ItemSubclassWeapon::ITEM_SUBCLASS_WEAPON_WAND:
@@ -1797,8 +1799,7 @@ void BotDataMgr::CreateWanderingBotsSortedGear()
                         {
                             if (!is_caster_item)
                             {
-                                if (proto.RequiredLevel < 60 - ITEM_SORTING_LEVEL_STEP)
-                                    push_gear_to_classes(proto, BOT_SLOT_MAINHAND, reqLstep, { BOT_CLASS_WARRIOR });
+                                push_gear_to_classes(proto, BOT_SLOT_MAINHAND, reqLstep, { BOT_CLASS_WARRIOR });
                                 push_gear_to_classes(proto, BOT_SLOT_MAINHAND, reqLstep, { BOT_CLASS_ROGUE, BOT_CLASS_SPELLBREAKER });
                             }
                             push_gear_to_classes(proto, BOT_SLOT_MAINHAND, reqLstep, { BOT_CLASS_SHAMAN });
@@ -1819,8 +1820,7 @@ void BotDataMgr::CreateWanderingBotsSortedGear()
                         {
                             if (!is_caster_item)
                             {
-                                if (proto.RequiredLevel < 60 - ITEM_SORTING_LEVEL_STEP)
-                                    push_gear_to_classes(proto, BOT_SLOT_MAINHAND, reqLstep, { BOT_CLASS_WARRIOR });
+                                push_gear_to_classes(proto, BOT_SLOT_MAINHAND, reqLstep, { BOT_CLASS_WARRIOR });
                                 push_gear_to_classes(proto, BOT_SLOT_MAINHAND, reqLstep, { BOT_CLASS_ROGUE, BOT_CLASS_SPELLBREAKER });
                             }
                             push_gear_to_classes(proto, BOT_SLOT_MAINHAND, reqLstep, { BOT_CLASS_SHAMAN });
@@ -1843,8 +1843,7 @@ void BotDataMgr::CreateWanderingBotsSortedGear()
                         {
                             if (!is_caster_item)
                             {
-                                if (proto.RequiredLevel < 60 - ITEM_SORTING_LEVEL_STEP)
-                                    push_gear_to_classes(proto, BOT_SLOT_MAINHAND, reqLstep, { BOT_CLASS_WARRIOR });
+                                push_gear_to_classes(proto, BOT_SLOT_MAINHAND, reqLstep, { BOT_CLASS_WARRIOR });
                                 push_gear_to_classes(proto, BOT_SLOT_MAINHAND, reqLstep, { BOT_CLASS_ROGUE, BOT_CLASS_SPELLBREAKER, BOT_CLASS_DARK_RANGER });
                             }
                             if (is_caster_item || proto.RequiredLevel < 55 || (proto.RequiredLevel < 78 && (proto.RandomProperty || proto.RandomSuffix)))
@@ -1865,8 +1864,7 @@ void BotDataMgr::CreateWanderingBotsSortedGear()
                         {
                             if (!is_caster_item)
                             {
-                                if (proto.RequiredLevel < 60 - ITEM_SORTING_LEVEL_STEP)
-                                    push_gear_to_classes(proto, BOT_SLOT_MAINHAND, reqLstep, { BOT_CLASS_WARRIOR });
+                                push_gear_to_classes(proto, BOT_SLOT_MAINHAND, reqLstep, { BOT_CLASS_WARRIOR });
                                 push_gear_to_classes(proto, BOT_SLOT_MAINHAND, reqLstep, { BOT_CLASS_SHAMAN, BOT_CLASS_ROGUE, BOT_CLASS_SPELLBREAKER });
                             }
                         }
