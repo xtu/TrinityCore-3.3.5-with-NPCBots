@@ -1321,8 +1321,11 @@ bool bot_ai::IsPointedHealTarget(Unit const* target) const
 {
     return IsPointedTarget(target, BotMgr::GetHealTargetIconFlags());
 }
-//unused
 bool bot_ai::IsPointedTankingTarget(Unit const* target) const
+{
+    return IsPointedTarget(target, BotMgr::GetTankTargetIconFlags());
+}
+bool bot_ai::IsPointedOffTankingTarget(Unit const* target) const
 {
     return IsPointedTarget(target, BotMgr::GetOffTankTargetIconFlags());
 }
@@ -3470,8 +3473,10 @@ void bot_ai::ReceiveEmote(Player* player, uint32 emote)
 //For now all your puppets are in your group automatically
 bool bot_ai::IsInBotParty(Unit const* unit) const
 {
-    if (!unit) return false;
-    if (unit == master || unit == me || unit == botPet) return true;
+    if (!unit)
+        return false;
+    if (unit == master || unit == me || unit == botPet)
+        return true;
 
     if (IAmFree())
     {
@@ -3484,7 +3489,7 @@ bool bot_ai::IsInBotParty(Unit const* unit) const
 
         return
             (unit->GetTypeId() == TYPEID_PLAYER || unit->ToCreature()->IsPet() || unit->ToCreature()->IsNPCBotOrPet()) &&
-            (unit->GetFaction() == me->GetFaction() ||
+            (unit->GetFaction() == me->GetFaction() || (me->GetBotGroup() && me->GetBotGroup()->IsMember(unit->GetGUID())) ||
             (me->GetReactionTo(unit) >= REP_FRIENDLY && unit->GetReactionTo(me) >= REP_FRIENDLY));
     }
 
@@ -13786,7 +13791,7 @@ bool bot_ai::IsTank(Unit const* unit) const
     {
         if (Group const* gr = player->GetGroup())
         {
-            if (gr->GetMemberFlags(unit->GetGUID()) & MEMBER_FLAG_MAINTANK)
+            if (gr->GetMemberFlags(unit->GetGUID()) & (MEMBER_FLAG_MAINTANK | MEMBER_FLAG_MAINASSIST))
                 return true;
             if (gr->isLFGGroup() && sLFGMgr->GetRoles(unit->GetGUID()) & lfg::PLAYER_ROLE_TANK)
                 return true;
@@ -13804,18 +13809,12 @@ bool bot_ai::IsOffTank(Unit const* unit) const
     if (Creature const* bot = unit->ToCreature())
         return bot->GetBotAI() && bot->GetBotAI()->HasRole(BOT_ROLE_TANK_OFF);
 
-    //Unused part
     if (Player const* player = unit->ToPlayer())
     {
         if (Group const* gr = player->GetGroup())
         {
-            if (gr->isRaidGroup())
-            {
-                Group::MemberSlotList const& slots = gr->GetMemberSlots();
-                for (Group::member_citerator itr = slots.begin(); itr != slots.end(); ++itr)
-                    if (itr->guid == unit->GetGUID())
-                        return itr->flags & MEMBER_FLAG_MAINASSIST;
-            }
+            if (gr->GetMemberFlags(unit->GetGUID()) & (MEMBER_FLAG_MAINTANK | MEMBER_FLAG_MAINASSIST))
+                return true;
         }
     }
 
