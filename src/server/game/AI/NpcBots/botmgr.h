@@ -186,6 +186,7 @@ class TC_GAME_API BotMgr
         uint32 GetAllNpcBotsClassMask() const;
         static uint8 GetMaxNpcBots();
         static uint8 GetNpcBotXpReduction();
+        static uint8 GetNpcBotXpReductionStartingNumber();
         static int32 GetBotInfoPacketsLimit();
         static bool LimitBots(Map const* map);
         static bool CanBotParryWhileCasting(Creature const* bot);
