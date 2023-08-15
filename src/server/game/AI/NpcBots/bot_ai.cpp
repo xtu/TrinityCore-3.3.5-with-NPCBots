@@ -17478,27 +17478,9 @@ void bot_ai::UpdateReviveTimer(uint32 diff)
             if (IsWanderer())
             {
                 outdoorsTimer = 0;
-
-                Position safePos;
-                if (me->GetMap()->GetEntry()->IsContinent())
+                if (me->GetMap()->GetEntry()->IsContinent() || me->GetMap()->IsBattleground())
                 {
-                    TeamId my_team = BotDataMgr::GetTeamIdForFaction(me->GetFaction());
-                    WorldSafeLocsEntry const* gy = sObjectMgr->GetClosestGraveyard(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetMapId(),
-                        my_team == TEAM_HORDE ? HORDE : ALLIANCE);
-                    if (gy)
-                    {
-                        safePos.Relocate(gy->Loc.X, gy->Loc.Y, gy->Loc.Z, me->GetOrientation());
-                        if (me->GetDistance(safePos) > 15.0f)
-                            BotMgr::TeleportBot(me, sMapMgr->CreateBaseMap(gy->Continent), &safePos);
-                    }
-                    else
-                        safePos.Relocate(me);
-                }
-                else
-                    safePos.Relocate(me);
-
-                if (safePos.GetExactDist2d(homepos) > MAX_WANDER_NODE_DISTANCE || me->GetMap()->IsBattleground())
-                {
+                    Position safePos(*me);
                     WanderNode const* nextNode = GetNextTravelNode(&safePos, true);
                     if (!nextNode)
                     {
@@ -17509,6 +17491,8 @@ void bot_ai::UpdateReviveTimer(uint32 diff)
                     }
 
                     homepos.Relocate(nextNode);
+                    if (me->GetMap()->GetEntry()->IsContinent())
+                        BotMgr::TeleportBot(me, sMapMgr->CreateBaseMap(nextNode->GetMapId()), nextNode, true);
 
                     TC_LOG_TRACE("npcbots", "Bot %s id %u class %u level %u died on the way from node %u to %u ('%s'), NEW %u ('%s'), %s, dist %.1f yd!",
                         me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()), _travel_node_last ? _travel_node_last->GetWPId() : 0, _travel_node_cur->GetWPId(),
