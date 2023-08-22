@@ -1785,7 +1785,7 @@ bool Creature::LoadFromDB(ObjectGuid::LowType spawnId, Map* map, bool addToMap, 
         if (sWorld->GetMaxPlayerCount() > 0)
             return false;
 
-        TC_LOG_INFO("entities.unit", "Creature: loading npcbot %s (id: %u)", GetName().c_str(), GetEntry());
+        TC_LOG_INFO("entities.unit", "Creature: loading npcbot {} (id: {})", GetName(), GetEntry());
         ASSERT(!IsInWorld());
 
         //don't allow removing dead bot's corpse
@@ -3593,7 +3593,7 @@ bool Creature::LoadBotCreatureFromDB(ObjectGuid::LowType spawnId, Map* map, bool
     {
         if (!generated)
         {
-            TC_LOG_ERROR("sql.sql", "Bot creature (GUID: %u) not found in table `creature`, can't load. ", spawnId);
+            TC_LOG_ERROR("sql.sql", "Bot creature (GUID: {}) not found in table `creature`, can't load. ", spawnId);
             return false;
         }
         else
@@ -3627,7 +3627,7 @@ bool Creature::LoadBotCreatureFromDB(ObjectGuid::LowType spawnId, Map* map, bool
     // checked at creature_template loading
     m_defaultMovementType = data ? MovementGeneratorType(data->movementType) : IDLE_MOTION_TYPE;
 
-    TC_LOG_INFO("entities.unit", "Creature: loading npcbot %s (id: %u, gen: %u)", GetName().c_str(), GetEntry(), uint32(generated));
+    TC_LOG_INFO("entities.unit", "Creature: loading npcbot {} (id: {}, gen: {})", GetName(), GetEntry(), uint32(generated));
     ASSERT(!IsInWorld());
 
     m_corpseDelay = 0;

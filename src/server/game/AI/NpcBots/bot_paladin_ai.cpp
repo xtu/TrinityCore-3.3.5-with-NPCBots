@@ -2,6 +2,7 @@
 #include "botmgr.h"
 #include "bottext.h"
 #include "bottraits.h"
+#include "Containers.h"
 #include "Creature.h"
 #include "Group.h"
 #include "Item.h"

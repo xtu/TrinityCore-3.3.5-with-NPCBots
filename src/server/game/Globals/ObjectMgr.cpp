@@ -9069,7 +9069,7 @@ void ObjectMgr::LoadCreatureOutfits()
 
         if (!GetCreatureTemplate(entry))
         {
-            TC_LOG_ERROR("server.loading", ">> Creature entry %u in `creature_template_outfits`, but not in `creature_template`!", entry);
+            TC_LOG_ERROR("server.loading", ">> Creature entry {} in `creature_template_outfits`, but not in `creature_template`!", entry);
             continue;
         }
 
@@ -9078,7 +9078,7 @@ void ObjectMgr::LoadCreatureOutfits()
         ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(co.race);
         if (!rEntry)
         {
-            TC_LOG_ERROR("server.loading", ">> Creature entry %u in `creature_template_outfits` has incorrect race (%u).", entry, uint32(co.race));
+            TC_LOG_ERROR("server.loading", ">> Creature entry {} in `creature_template_outfits` has incorrect race ({}).", entry, uint32(co.race));
             continue;
         }
         co.gender        = fields[i++].GetUInt8();
@@ -9092,7 +9092,7 @@ void ObjectMgr::LoadCreatureOutfits()
                 _creatureTemplateStore[entry].Modelid1 = rEntry->MaleDisplayID;
                 break;
             default:
-                TC_LOG_ERROR("server.loading", ">> Creature entry %u in `creature_template_outfits` has invalid gender %u", entry, uint32(co.gender));
+                TC_LOG_ERROR("server.loading", ">> Creature entry {} in `creature_template_outfits` has invalid gender {}", entry, uint32(co.gender));
                 continue;
         }
         _creatureTemplateStore[entry].Modelid2 = 0;
@@ -9114,7 +9114,7 @@ void ObjectMgr::LoadCreatureOutfits()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u creature outfits in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    TC_LOG_INFO("server.loading", ">> Loaded {} creature outfits in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadGameTele()

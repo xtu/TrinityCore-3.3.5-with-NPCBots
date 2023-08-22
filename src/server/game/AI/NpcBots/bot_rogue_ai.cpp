@@ -1462,11 +1462,11 @@ public:
                 baseId == SETUP_EFFECT || baseId == INITIATIVE_EFFECT || baseId == HONOR_AMONG_THIEVES_EFFECT)
             {
                 ++comboPoints;
-                //TC_LOG_ERROR("entities.player", "rogue_bot CP GEN2: %s adds 1, now %u", spell->SpellName[0], uint32(comboPoints));
+                //TC_LOG_ERROR("entities.player", "rogue_bot CP GEN2: {} adds 1, now {}", spell->SpellName[0], uint32(comboPoints));
                 if (comboPoints > 5)
                 {
                     comboPoints = 5;
-                    //TC_LOG_ERROR("entities.player", "rogue_bot CP NOR2: now %u", uint32(comboPoints));
+                    //TC_LOG_ERROR("entities.player", "rogue_bot CP NOR2: now {}", uint32(comboPoints));
                 }
             }
             //Combo point generating from spells
@@ -1478,7 +1478,7 @@ public:
                 (baseId == MUTILATE_1 || baseId == PREMEDITATION_1 || baseId == CHEAP_SHOT_1) ?
                     comboPoints += 2 : ++comboPoints;
 
-                //TC_LOG_ERROR("entities.player", "rogue_bot CP GEN1: %s adds %u, now %u",
+                //TC_LOG_ERROR("entities.player", "rogue_bot CP GEN1: {} adds {}, now {}",
                 //    spell->SpellName[0], (baseId == MUTILATE_1 || baseId == PREMEDITATION_1 || baseId == CHEAP_SHOT_1) ?
                 //    2 : 1, uint32(comboPoints));
 
@@ -1486,13 +1486,13 @@ public:
                 if (baseId == SINISTER_STRIKE_1 && glyphSSProc)
                 {
                     ++comboPoints;
-                    //TC_LOG_ERROR("entities.player", "rogue_bot CP GEN1: glyphSS proc, now %u", uint32(comboPoints));
+                    //TC_LOG_ERROR("entities.player", "rogue_bot CP GEN1: glyphSS proc, now {}", uint32(comboPoints));
                 }
 
                 if (comboPoints > 5)
                 {
                     comboPoints = 5;
-                    //TC_LOG_ERROR("entities.player", "rogue_bot CP NOR1: now %u", uint32(comboPoints));
+                    //TC_LOG_ERROR("entities.player", "rogue_bot CP NOR1: now {}", uint32(comboPoints));
                 }
             }
             //if (spellId == EVISCERATE || spellId == KIDNEY_SHOT || spellId == SLICE_DICE || spellId == RUPTURE || spellId == EXPOSE_ARMOR || spellId == ENVENOM)
@@ -1503,7 +1503,7 @@ public:
                 //comboPoints = 0;
                 combopointsSpent = true; //envenom problem - cps spent before aura application
 
-                //TC_LOG_ERROR("entities.player", "rogue_bot CP SPEND1: %u to 0", tempCP);
+                //TC_LOG_ERROR("entities.player", "rogue_bot CP SPEND1: {} to 0", tempCP);
 
                 //Relentless Strikes: moved to OnClassSpellGo (triggered even without hitting the target)
 

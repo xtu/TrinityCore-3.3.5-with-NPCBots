@@ -260,7 +260,7 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, Battlegr
     {
         if (!BotDataMgr::GenerateBattlegroundBots(leader, grp, this, bracketEntry, ginfo))
         {
-            TC_LOG_WARN("npcbots", "Did NOT generate bots for BG %u for leader %s (%u members)",
+            TC_LOG_WARN("npcbots", "Did NOT generate bots for BG {} for leader {} ({} members)",
                 BgTypeId, leader->GetDebugInfo().c_str(), grp ? grp->GetMembersCount() : 0u);
         }
     }
@@ -301,7 +301,7 @@ GroupQueueInfo* BattlegroundQueue::AddBotAsGroup(ObjectGuid guid, uint32 team, B
     if (ginfo->Team == HORDE)
         index++;
 
-    TC_LOG_DEBUG("npcbots", "Adding NPCBot %u to BattlegroundQueue bgTypeId : %u, bracket_id : %u, index : %u", guid.GetEntry(), BgTypeId, bracketId, index);
+    TC_LOG_DEBUG("npcbots", "Adding NPCBot {} to BattlegroundQueue bgTypeId : {}, bracket_id : {}, index : {}", guid.GetEntry(), BgTypeId, bracketId, index);
 
     uint32 lastOnlineTime = GameTime::GetGameTimeMS();
 

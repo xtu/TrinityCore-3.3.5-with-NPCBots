@@ -3,6 +3,7 @@
 #include "botspell.h"
 #include "bottext.h"
 #include "bottraits.h"
+#include "Containers.h"
 #include "Group.h"
 #include "Item.h"
 #include "Map.h"

@@ -201,7 +201,7 @@ bool Group::Create(Player* leader)
         _initRaidSubGroupsCounter();
 
     //npcbot - set loot mode on create
-    //TC_LOG_ERROR("entities.player", "Group::Create(): new group with leader %s", leader->GetName().c_str());
+    //TC_LOG_ERROR("entities.player", "Group::Create(): new group with leader {}", leader->GetName());
     if (leader->HaveBot()) //player + npcbot so set to free-for-all on create
     {
         if (!isLFGGroup())

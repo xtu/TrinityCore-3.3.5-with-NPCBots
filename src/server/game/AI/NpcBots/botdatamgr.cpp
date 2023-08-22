@@ -81,14 +81,14 @@ public:
 
     void AbortMe()
     {
-        TC_LOG_ERROR("npcbots", "BotBattlegroundEnterEvent: Aborting bot %u bg %u!", _botGUID.GetEntry(), uint32(_bgQueueTypeId));
+        TC_LOG_ERROR("npcbots", "BotBattlegroundEnterEvent: Aborting bot {} bg {}!", _botGUID.GetEntry(), uint32(_bgQueueTypeId));
         sBattlegroundMgr->GetBattlegroundQueue(_bgQueueTypeId).RemovePlayer(_botGUID, true);
         BotDataMgr::DespawnWandererBot(_botGUID.GetEntry());
     }
 
     void AbortAll()
     {
-        TC_LOG_ERROR("npcbots", "BotBattlegroundEnterEvent: Aborting ALL bots by %u bg %u!", _playerGUID.GetCounter(), uint32(_bgQueueTypeId));
+        TC_LOG_ERROR("npcbots", "BotBattlegroundEnterEvent: Aborting ALL bots by {} bg {}!", _playerGUID.GetCounter(), uint32(_bgQueueTypeId));
         AbortMe();
         botBGJoinEvents.at(_playerGUID).KillAllEvents(false);
     }
@@ -154,9 +154,9 @@ void SpawnWandererBot(uint32 bot_id, WanderNode const* spawnLoc, NpcBotRegistry*
     Map* map = sMapMgr->CreateBaseMap(spawnLoc->GetMapId());
     map->LoadGrid(spawnLoc->m_positionX, spawnLoc->m_positionY);
 
-    TC_LOG_DEBUG("npcbots", "Spawning wandering bot: %s (%u) class %u race %u fac %u, location: mapId %u %s (%s)",
-        bot_template.Name.c_str(), bot_id, uint32(bot_extras->bclass), uint32(bot_extras->race), bot_data->faction,
-        spawnLoc->GetMapId(), spawnLoc->ToString().c_str(), spawnLoc->GetName().c_str());
+    TC_LOG_DEBUG("npcbots", "Spawning wandering bot: {} ({}) class {} race {} fac {}, location: mapId {} {} ({})",
+        bot_template.Name, bot_id, uint32(bot_extras->bclass), uint32(bot_extras->race), bot_data->faction,
+        spawnLoc->GetMapId(), spawnLoc->ToString(), spawnLoc->GetName());
 
     Creature* bot = new Creature();
     if (!bot->LoadBotCreatureFromDB(0, map, true, true, bot_id, &spawnPos))
@@ -180,7 +180,7 @@ void BotDataMgr::DespawnWandererBot(uint32 entry)
         _botsWanderCreaturesToDespawn.insert(entry);
     }
     else
-        TC_LOG_ERROR("npcbots", "DespawnWandererBot(): trying to despawn non-existing wanderer bot %u '%s'!", entry, bot ? bot->GetName().c_str() : "unknown");
+        TC_LOG_ERROR("npcbots", "DespawnWandererBot(): trying to despawn non-existing wanderer bot {} '{}'!", entry, bot ? bot->GetName() : "unknown");
 }
 
 struct WanderingBotsGenerator
@@ -593,7 +593,7 @@ void BotDataMgr::Update(uint32 diff)
 
     if (!_botsWanderCreaturesToDespawn.empty())
     {
-        TC_LOG_DEBUG("npcbots", "Bots to despawn: %u", uint32(_botsWanderCreaturesToDespawn.size()));
+        TC_LOG_DEBUG("npcbots", "Bots to despawn: {}", uint32(_botsWanderCreaturesToDespawn.size()));
 
         while (!_botsWanderCreaturesToDespawn.empty())
         {
@@ -640,7 +640,7 @@ void BotDataMgr::Update(uint32 diff)
             _botsWanderCreatureEquipmentTemplates.erase(bwcetitr);
             _botsWanderCreatureTemplates.erase(bwctitr);
 
-            TC_LOG_DEBUG("npcbots", "Despawned wanderer bot %u '%s' (orig %u)", bot_despawn_id, botName.c_str(), origEntry);
+            TC_LOG_DEBUG("npcbots", "Despawned wanderer bot {} '{}' (orig {})", bot_despawn_id, botName, origEntry);
         }
     }
 
@@ -705,7 +705,7 @@ void BotDataMgr::LoadNpcBots(bool spawn)
 
             if (!sObjectMgr->GetCreatureTemplate(entry))
             {
-                TC_LOG_ERROR("server.loading", "Bot entry %u has appearance data but doesn't exist in `creature_template` table! Skipped.", entry);
+                TC_LOG_ERROR("server.loading", "Bot entry {} has appearance data but doesn't exist in `creature_template` table! Skipped.", entry);
                 continue;
             }
 
@@ -738,7 +738,7 @@ void BotDataMgr::LoadNpcBots(bool spawn)
 
             if (!sObjectMgr->GetCreatureTemplate(entry))
             {
-                TC_LOG_ERROR("server.loading", "Bot entry %u has extras data but doesn't exist in `creature_template` table! Skipped.", entry);
+                TC_LOG_ERROR("server.loading", "Bot entry {} has extras data but doesn't exist in `creature_template` table! Skipped.", entry);
                 continue;
             }
 
@@ -767,7 +767,7 @@ void BotDataMgr::LoadNpcBots(bool spawn)
 
             if (!sObjectMgr->GetCreatureTemplate(entry))
             {
-                TC_LOG_ERROR("server.loading", "Bot entry %u has transmog data but doesn't exist in `creature_template` table! Skipped.", entry);
+                TC_LOG_ERROR("server.loading", "Bot entry {} has transmog data but doesn't exist in `creature_template` table! Skipped.", entry);
                 continue;
             }
 
@@ -811,7 +811,7 @@ void BotDataMgr::LoadNpcBots(bool spawn)
 
             if (!sObjectMgr->GetCreatureTemplate(entry))
             {
-                TC_LOG_ERROR("server.loading", "Bot entry %u doesn't exist in `creature_template` table! Skipped.", entry);
+                TC_LOG_ERROR("server.loading", "Bot entry {} doesn't exist in `creature_template` table! Skipped.", entry);
                 continue;
             }
 
@@ -838,7 +838,7 @@ void BotDataMgr::LoadNpcBots(bool spawn)
 
         } while (result->NextRow());
 
-        TC_LOG_INFO("server.loading", ">> Loaded %u bot data entries", datacounter);
+        TC_LOG_INFO("server.loading", ">> Loaded {} bot data entries", datacounter);
 
         if (spawn)
         {
@@ -850,7 +850,7 @@ void BotDataMgr::LoadNpcBots(bool spawn)
                 infores = WorldDatabase.PQuery("SELECT guid, map, position_x, position_y"/*, position_z, orientation*/" FROM creature WHERE id = %u", entry);
                 if (!infores)
                 {
-                    TC_LOG_ERROR("server.loading", "Cannot spawn npcbot %s (id: %u), not found in `creature` table!", proto->Name.c_str(), entry);
+                    TC_LOG_ERROR("server.loading", "Cannot spawn npcbot {} (id: {}), not found in `creature` table!", proto->Name, entry);
                     continue;
                 }
 
@@ -870,37 +870,37 @@ void BotDataMgr::LoadNpcBots(bool spawn)
                 map->LoadGrid(pos_x, pos_y);
 
                 ObjectGuid Guid(HighGuid::Unit, entry, tableGuid);
-                TC_LOG_DEBUG("server.loading", "bot %u: spawnId %u, full %s", entry, tableGuid, Guid.ToString().c_str());
+                TC_LOG_DEBUG("server.loading", "bot {}: spawnId {}, full {}", entry, tableGuid, Guid.ToString());
                 Creature* bot = map->GetCreature(Guid);
                 if (!bot) //not in map, use storage
                 {
-                    //TC_LOG_DEBUG("server.loading", "bot %u: spawnId %u, is not in map on load", entry, tableGuid);
+                    //TC_LOG_DEBUG("server.loading", "bot {}: spawnId {}, is not in map on load", entry, tableGuid);
                     typedef Map::CreatureBySpawnIdContainer::const_iterator SpawnIter;
                     std::pair<SpawnIter, SpawnIter> creBounds = map->GetCreatureBySpawnIdStore().equal_range(tableGuid);
                     if (creBounds.first == creBounds.second)
                     {
-                        TC_LOG_ERROR("server.loading", "bot %u is not in spawns list, consider re-spawning it!", entry);
+                        TC_LOG_ERROR("server.loading", "bot {} is not in spawns list, consider re-spawning it!", entry);
                         continue;
                     }
                     bot = creBounds.first->second;
                 }
                 ASSERT(bot);
                 if (!bot->FindMap())
-                    TC_LOG_ERROR("server.loading", "bot %u is not in map!", entry);
+                    TC_LOG_ERROR("server.loading", "bot {} is not in map!", entry);
                 if (!bot->IsInWorld())
-                    TC_LOG_ERROR("server.loading", "bot %u is not in world!", entry);
+                    TC_LOG_ERROR("server.loading", "bot {} is not in world!", entry);
                 if (!bot->IsAlive())
                 {
-                    TC_LOG_ERROR("server.loading", "bot %u is dead, respawning!", entry);
+                    TC_LOG_ERROR("server.loading", "bot {} is dead, respawning!", entry);
                     bot->Respawn();
                 }
 
-                TC_LOG_DEBUG("server.loading", ">> Spawned npcbot %s (id: %u, map: %u, grid: %u, cell: %u)", proto->Name.c_str(), entry, mapId, g.GetId(), c.GetId());
+                TC_LOG_DEBUG("server.loading", ">> Spawned npcbot {} (id: {}, map: {}, grid: {}, cell: {})", proto->Name, entry, mapId, g.GetId(), c.GetId());
                 botgrids.insert(g.GetId());
                 ++botcounter;
             }
 
-            TC_LOG_INFO("server.loading", ">> Spawned %u npcbot(s) within %u grid(s) in %u ms", botcounter, uint32(botgrids.size()), GetMSTimeDiffToNow(botoldMSTime));
+            TC_LOG_INFO("server.loading", ">> Spawned {} npcbot(s) within {} grid(s) in {} ms", botcounter, uint32(botgrids.size()), GetMSTimeDiffToNow(botoldMSTime));
         }
     }
     else
@@ -935,7 +935,7 @@ void BotDataMgr::LoadNpcBotGroupData()
         uint8 subgroup = fields[3].GetUInt8();
         if (!SelectNpcBotExtras(creature_id))
         {
-            TC_LOG_WARN("server.loading", "Table `characters_npcbot_group_member` contains non-NPCBot creature %u which will not be loaded!", creature_id);
+            TC_LOG_WARN("server.loading", "Table `characters_npcbot_group_member` contains non-NPCBot creature {} which will not be loaded!", creature_id);
             continue;
         }
 
@@ -945,13 +945,13 @@ void BotDataMgr::LoadNpcBotGroupData()
             const_cast<Creature*>(ASSERT_NOTNULL(BotDataMgr::FindBot(creature_id)))->SetBotGroup(group, subgroup);
         }
         else
-            TC_LOG_ERROR("misc", "BotDataMgr::LoadNpcBotGroupData: Consistency failed, can't find group (storage id: %u)", fields[0].GetUInt32());
+            TC_LOG_ERROR("misc", "BotDataMgr::LoadNpcBotGroupData: Consistency failed, can't find group (storage id: {})", fields[0].GetUInt32());
 
         ++count;
 
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u NPCBot group members in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    TC_LOG_INFO("server.loading", ">> Loaded {} NPCBot group members in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void BotDataMgr::LoadNpcBotGearStorage()
@@ -990,7 +990,7 @@ void BotDataMgr::LoadNpcBotGearStorage()
 
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u NPCBot stored items for %u bot owners in %u ms", count, uint32(player_guids.size()), GetMSTimeDiffToNow(oldMSTime));
+    TC_LOG_INFO("server.loading", ">> Loaded {} NPCBot stored items for {} bot owners in {} ms", count, uint32(player_guids.size()), GetMSTimeDiffToNow(oldMSTime));
 }
 
 void BotDataMgr::LoadWanderMap(bool reload)
@@ -1062,16 +1062,16 @@ void BotDataMgr::LoadWanderMap(bool reload)
         MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
         if (!mapEntry)
         {
-            TC_LOG_ERROR("server.loading", "WP %u has invalid map id %u!", id, mapId);
+            TC_LOG_ERROR("server.loading", "WP {} has invalid map id {}!", id, mapId);
             continue;
         }
 
         if (minLevel == 1u && maxLevel == DEFAULT_MAX_LEVEL)
-            TC_LOG_WARN("server.loading", "WP %u has no levels set.", id);
+            TC_LOG_WARN("server.loading", "WP {} has no levels set.", id);
 
         if (!minLevel || !maxLevel || minLevel > DEFAULT_MAX_LEVEL || maxLevel > DEFAULT_MAX_LEVEL || minLevel > maxLevel)
         {
-            TC_LOG_WARN("server.loading", "WP %u has invalid levels min %u max %u! Setting to default...",
+            TC_LOG_WARN("server.loading", "WP {} has invalid levels min {} max {}! Setting to default...",
                 id, uint32(minLevel), uint32(maxLevel));
             minLevel = 1;
             maxLevel = DEFAULT_MAX_LEVEL;
@@ -1079,21 +1079,21 @@ void BotDataMgr::LoadWanderMap(bool reload)
 
         if (flags >= AsUnderlyingType(BotWPFlags::BOTWP_FLAG_END))
         {
-            TC_LOG_WARN("server.loading", "WP %u has invalid flags %u! Removing all invalid flags...", id, flags);
+            TC_LOG_WARN("server.loading", "WP {} has invalid flags {}! Removing all invalid flags...", id, flags);
             flags &= (AsUnderlyingType(BotWPFlags::BOTWP_FLAG_END) - 1);
         }
 
         const uint32 nonbg_flags = AsUnderlyingType(BotWPFlags::BOTWP_FLAG_BG_FLAG_PICKUP_TARGET) | AsUnderlyingType(BotWPFlags::BOTWP_FLAG_BG_FLAG_DELIVER_TARGET);
         if ((flags & nonbg_flags) && !mapEntry->IsBattleground())
         {
-            TC_LOG_WARN("server.loading", "WP %u has BG-only flags %u for non-BG map %u! Removing...", id, (flags & nonbg_flags), mapEntry->ID);
+            TC_LOG_WARN("server.loading", "WP {} has BG-only flags {} for non-BG map {}! Removing...", id, (flags & nonbg_flags), mapEntry->ID);
             flags &= ~nonbg_flags;
         }
 
         const uint32 conflicting_flags_1 = AsUnderlyingType(BotWPFlags::BOTWP_FLAG_ALLIANCE_ONLY) | AsUnderlyingType(BotWPFlags::BOTWP_FLAG_HORDE_ONLY);
         if ((flags & conflicting_flags_1) == conflicting_flags_1)
         {
-            TC_LOG_WARN("server.loading", "WP %u has conflicting flags %u+%u! Removing both...",
+            TC_LOG_WARN("server.loading", "WP {} has conflicting flags {}+{}! Removing both...",
                 id, AsUnderlyingType(BotWPFlags::BOTWP_FLAG_ALLIANCE_ONLY), AsUnderlyingType(BotWPFlags::BOTWP_FLAG_HORDE_ONLY));
             flags &= ~conflicting_flags_1;
         }
@@ -1113,7 +1113,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
 
         if (lstr.empty())
         {
-            TC_LOG_ERROR("server.loading", "WP %u has no links!", id);
+            TC_LOG_ERROR("server.loading", "WP {} has no links!", id);
             continue;
         }
         std::vector<std::string_view> tok = Trinity::Tokenize(lstr, ' ', false);
@@ -1155,7 +1155,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
     {
         if (!kv.second)
         {
-            TC_LOG_FATAL("server.loading", "No valid Alliance spawn node for at least level %u on map %u! Spawning wandering bots is impossible! Aborting.",
+            TC_LOG_FATAL("server.loading", "No valid Alliance spawn node for at least level {} on map {}! Spawning wandering bots is impossible! Aborting.",
                 maxof_minclasslvl_nr, kv.first);
             spawn_node_minclasslvl_exists_all = false;
         }
@@ -1164,7 +1164,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
     {
         if (!kv.second)
         {
-            TC_LOG_FATAL("server.loading", "No valid Horde spawn node for at least level %u on map %u! Spawning wandering bots is impossible! Aborting.",
+            TC_LOG_FATAL("server.loading", "No valid Horde spawn node for at least level {} on map {}! Spawning wandering bots is impossible! Aborting.",
                 maxof_minclasslvl_nr, kv.first);
             spawn_node_minclasslvl_exists_all = false;
         }
@@ -1174,10 +1174,10 @@ void BotDataMgr::LoadWanderMap(bool reload)
         if (!kv.second)
         {
             if (sMapStore.LookupEntry(kv.first)->IsBattlegroundOrArena())
-                TC_LOG_INFO("server.loading", "No valid Neutral spawn node for at least level %u on non-continent map %u.", maxof_minclasslvl_ex, kv.first);
+                TC_LOG_INFO("server.loading", "No valid Neutral spawn node for at least level {} on non-continent map {}.", maxof_minclasslvl_ex, kv.first);
             else
             {
-                TC_LOG_FATAL("server.loading", "No valid Neutral spawn node for at least level %u on map %u! Spawning wandering bots is impossible! Aborting.",
+                TC_LOG_FATAL("server.loading", "No valid Neutral spawn node for at least level {} on map {}! Spawning wandering bots is impossible! Aborting.",
                     maxof_minclasslvl_ex, kv.first);
                 spawn_node_minclasslvl_exists_all = false;
             }
@@ -1225,7 +1225,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
         for (uint32 i = min_spawn_level; i <= max_spawn_level; ++i)
         {
             if (vec[i - 1] == false)
-                TC_LOG_ERROR("server.loading", "No %s spawn node found for level %u! Wandering bots may cause a crash!", team_strs[k], i);
+                TC_LOG_ERROR("server.loading", "No {} spawn node found for level {}! Wandering bots may cause a crash!", team_strs[k], i);
         }
     }
 
@@ -1238,28 +1238,28 @@ void BotDataMgr::LoadWanderMap(bool reload)
             uint32 lid = *Trinity::StringTo<uint32>(p.first);
             if (lid == vt.first)
             {
-                TC_LOG_ERROR("server.loading", "WP %u has link %u which links to itself! Skipped.", vt.first, lid);
+                TC_LOG_ERROR("server.loading", "WP {} has link {} which links to itself! Skipped.", vt.first, lid);
                 continue;
             }
 
             WanderNode* lwp = WanderNode::FindInAllWPs(lid);
             if (!lwp)
             {
-                TC_LOG_ERROR("server.loading", "WP %u has link %u which does not exist!", vt.first, lid);
+                TC_LOG_ERROR("server.loading", "WP {} has link {} which does not exist!", vt.first, lid);
                 continue;
             }
             if (lwp->GetMapId() != vt.second.first->GetMapId())
             {
-                TC_LOG_ERROR("server.loading", "WP %u map %u has link %u ON A DIFFERENT MAP %u!", vt.first, vt.second.first->GetMapId(), lid, lwp->GetMapId());
+                TC_LOG_ERROR("server.loading", "WP {} map {} has link {} ON A DIFFERENT MAP {}!", vt.first, vt.second.first->GetMapId(), lid, lwp->GetMapId());
                 continue;
             }
 
             bool is_continent = sMapStore.LookupEntry(vt.second.first->GetMapId())->IsContinent();
             float lwpdist2d = vt.second.first->GetExactDist2d(lwp);
             if (lwpdist2d > MAX_WANDER_NODE_DISTANCE)
-                TC_LOG_WARN("server.loading", "Warning! Link distance between WP %u and %u is too great (%.2f)", vt.first, lid, lwpdist2d);
+                TC_LOG_WARN("server.loading", "Warning! Link distance between WP {} and {} is too great ({})", vt.first, lid, lwpdist2d);
             if (lwpdist2d < MIN_WANDER_NODE_DISTANCE && is_continent)
-                TC_LOG_WARN("server.loading", "Warning! Link distance between WP %u and %u is low (%.2f)", vt.first, lid, lwpdist2d);
+                TC_LOG_WARN("server.loading", "Warning! Link distance between WP {} and {} is low ({})", vt.first, lid, lwpdist2d);
 
             vt.second.first->Link(lwp, true);
 
@@ -1278,7 +1278,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
     WanderNode::DoForAllWPs([&](WanderNode const* wp) {
         if (tops.count(wp) == 0u && wp->GetLinks().size() == 1u)
         {
-            TC_LOG_DEBUG("server.loading", "Node %u ('%s') has single connection!", wp->GetWPId(), wp->GetName().c_str());
+            TC_LOG_DEBUG("server.loading", "Node {} ('{}') has single connection!", wp->GetWPId(), wp->GetName());
             WanderNode const* tn = wp->GetLinks().front();
             WanderNode const* prev = nullptr;
             std::vector<WanderNode const*> sc_chain;
@@ -1297,7 +1297,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
             }
             if (sc_chain.back()->GetLinks().size() == 1u && prev && sc_chain.back()->GetLinks().front() == prev)
             {
-                TC_LOG_DEBUG("server.loading", "Node %u ('%s') has single connection!", tn->GetWPId(), tn->GetName().c_str());
+                TC_LOG_DEBUG("server.loading", "Node {} ('{}') has single connection!", tn->GetWPId(), tn->GetName());
                 tops.emplace(sc_chain.back());
                 std::ostringstream ss;
                 ss << "Node " << (sc_chain.size() == 2u ? "pair " : "chain ");
@@ -1308,12 +1308,12 @@ void BotDataMgr::LoadWanderMap(bool reload)
                         ss << '-';
                 }
                 ss << " is isolated!";
-                TC_LOG_INFO("server.loading", "%s", ss.str().c_str());
+                TC_LOG_INFO("server.loading", "{}", ss.str());
             }
         }
     });
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u bot wander nodes (%u disabled) on %u maps (total %u tops) in %u ms",
+    TC_LOG_INFO("server.loading", ">> Loaded {} bot wander nodes ({} disabled) on {} maps (total {} tops) in {} ms",
         uint32(WanderNode::GetAllWPsCount()), disabled_nodes, uint32(WanderNode::GetWPMapsCount()), uint32(tops.size()), GetMSTimeDiffToNow(botoldMSTime));
 }
 
@@ -1333,7 +1333,7 @@ void BotDataMgr::GenerateWanderingBots()
 
     if (maxbots < wandering_bots_desired)
     {
-        TC_LOG_FATAL("server.loading", "Only %u out of %u bots of enabled classes aren't spawned. Desired amount of wandering bots (%u) cannot be created. Aborting!",
+        TC_LOG_FATAL("server.loading", "Only {} out of {} bots of enabled classes aren't spawned. Desired amount of wandering bots ({}) cannot be created. Aborting!",
             maxbots, enabledbots, wandering_bots_desired);
         ASSERT(false);
     }
@@ -1341,11 +1341,11 @@ void BotDataMgr::GenerateWanderingBots()
     uint32 spawned_count = 0;
     if (!sBotGen->GenerateWanderingBotsToSpawn(wandering_bots_desired, -1, -1, false, nullptr, nullptr, spawned_count))
     {
-        TC_LOG_FATAL("server.loading", "Failed to spawn all %u bots (%u succeeded)!", wandering_bots_desired, spawned_count);
+        TC_LOG_FATAL("server.loading", "Failed to spawn all {} bots ({} succeeded)!", wandering_bots_desired, spawned_count);
         ASSERT(false);
     }
 
-    TC_LOG_INFO("server.loading", ">> Set up spawning of %u wandering bots in %u ms", spawned_count, GetMSTimeDiffToNow(oldMSTime));
+    TC_LOG_INFO("server.loading", ">> Set up spawning of {} wandering bots in {} ms", spawned_count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unused]] Group const* group, BattlegroundQueue* queue, PvPDifficultyEntry const* bracketEntry, GroupQueueInfo const* gqinfo)
@@ -1363,7 +1363,7 @@ bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unu
 
     if (tarteamplayers == 0)
     {
-        TC_LOG_INFO("npcbots", "[Disabled] BG %u wandering bots generation is disabled (not implemented?)", uint32(bgTypeId));
+        TC_LOG_INFO("npcbots", "[Disabled] BG {} wandering bots generation is disabled (not implemented?)", uint32(bgTypeId));
         return true;
     }
 
@@ -1379,8 +1379,8 @@ bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unu
                 if (real_bg->GetInstanceID() != 0 && real_bg->GetBracketId() == bracketId &&
                     real_bg->GetStatus() < STATUS_WAIT_LEAVE && real_bg->HasFreeSlots())
                 {
-                    TC_LOG_INFO("npcbots", "[Already running] Found running BG %u inited by player %s (%u). Not generating bots",
-                        uint32(bgTypeId), groupLeader->GetName().c_str(), groupLeader->GetGUID().GetCounter());
+                    TC_LOG_INFO("npcbots", "[Already running] Found running BG {} inited by player {} ({}). Not generating bots",
+                        uint32(bgTypeId), groupLeader->GetName(), groupLeader->GetGUID().GetCounter());
                     return true;
                 }
             }
@@ -1418,8 +1418,8 @@ bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unu
 
     if (needed_bots_count_a + needed_bots_count_h == 0)
     {
-        TC_LOG_INFO("npcbots", "[No bots required] Failed to generate bots for BG %u inited by player %s (%u)",
-            uint32(bgTypeId), groupLeader->GetName().c_str(), groupLeader->GetGUID().GetCounter());
+        TC_LOG_INFO("npcbots", "[No bots required] Failed to generate bots for BG {} inited by player {} ({})",
+            uint32(bgTypeId), groupLeader->GetName(), groupLeader->GetGUID().GetCounter());
         return true;
     }
 
@@ -1428,14 +1428,14 @@ bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unu
 
     if (queued_players_a + spare_bots_a < minteamplayers)
     {
-        TC_LOG_INFO("npcbots", "[Not enough A bots] Failed to generate bots for BG %u inited by player %s (%u)",
-            uint32(bgTypeId), groupLeader->GetName().c_str(), groupLeader->GetGUID().GetCounter());
+        TC_LOG_INFO("npcbots", "[Not enough A bots] Failed to generate bots for BG {} inited by player {} ({})",
+            uint32(bgTypeId), groupLeader->GetName(), groupLeader->GetGUID().GetCounter());
         return false;
     }
     if (queued_players_h + spare_bots_h < minteamplayers)
     {
-        TC_LOG_INFO("npcbots", "[Not enough H bots] Failed to generate bots for BG %u inited by player %s (%u)",
-            uint32(bgTypeId), groupLeader->GetName().c_str(), groupLeader->GetGUID().GetCounter());
+        TC_LOG_INFO("npcbots", "[Not enough H bots] Failed to generate bots for BG {} inited by player {} ({})",
+            uint32(bgTypeId), groupLeader->GetName(), groupLeader->GetGUID().GetCounter());
         return false;
     }
 
@@ -1451,8 +1451,8 @@ bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unu
     {
         if (!sBotGen->GenerateWanderingBotsToSpawn(needed_bots_count_a, bg_template->GetMapId(), ALLIANCE, true, bracketEntry, &spawned_bots_a, spawned_a))
         {
-            TC_LOG_WARN("npcbots", "Failed to spawn %u ALLIANCE bots for BG %u '%s' queued A %u H %u req A %u H %u spare %u",
-                needed_bots_count_a, uint32(bg_template->GetTypeID()), bg_template->GetName().c_str(),
+            TC_LOG_WARN("npcbots", "Failed to spawn {} ALLIANCE bots for BG {} '{}' queued A {} H {} req A {} H {} spare {}",
+                needed_bots_count_a, uint32(bg_template->GetTypeID()), bg_template->GetName(),
                 queued_players_a, queued_players_h, needed_bots_count_a, needed_bots_count_h, spare_bots_a);
             for (NpcBotRegistry const* registry1 : { &spawned_bots_a, &spawned_bots_h })
                 for (Creature const* bot : *registry1)
@@ -1464,8 +1464,8 @@ bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unu
     {
         if (!sBotGen->GenerateWanderingBotsToSpawn(needed_bots_count_h, bg_template->GetMapId(), HORDE, true, bracketEntry, &spawned_bots_h, spawned_h))
         {
-            TC_LOG_WARN("npcbots", "Failed to spawn %u HORDE bots for BG %u '%s' queued A %u H %u req A %u H %u spare %u",
-                needed_bots_count_h, uint32(bg_template->GetTypeID()), bg_template->GetName().c_str(),
+            TC_LOG_WARN("npcbots", "Failed to spawn {} HORDE bots for BG {} '{}' queued A {} H {} req A {} H {} spare {}",
+                needed_bots_count_h, uint32(bg_template->GetTypeID()), bg_template->GetName(),
                 queued_players_a, queued_players_h, needed_bots_count_a, needed_bots_count_h, spare_bots_h);
             for (NpcBotRegistry const* registry2 : { &spawned_bots_a, &spawned_bots_h })
                 for (Creature const* bot : *registry2)
@@ -1526,7 +1526,7 @@ void BotDataMgr::CreateWanderingBotsSortedGear()
 
         } while (dires->NextRow());
 
-        TC_LOG_INFO("server.loading", ">> Loaded %u disabled wandering bots gear items", uint32(disabled_item_ids.size()));
+        TC_LOG_INFO("server.loading", ">> Loaded {} disabled wandering bots gear items", uint32(disabled_item_ids.size()));
     }
     else
         TC_LOG_INFO("server.loading", ">> Loaded 0 disabled wandering bots gear items. Table `creature_template_npcbot_disabled_items` is empty!");
@@ -1600,7 +1600,7 @@ void BotDataMgr::CreateWanderingBotsSortedGear()
 
         if (!!disabled_item_ids.count(proto.ItemId))
         {
-            //TC_LOG_INFO("server.loading", "Item %u is disabled...", proto.ItemId);
+            //TC_LOG_INFO("server.loading", "Item {} is disabled...", proto.ItemId);
             continue;
         }
 
@@ -1977,13 +1977,13 @@ void BotDataMgr::CreateWanderingBotsSortedGear()
                 {
                     uint32 minlvl = std::max<uint32>(lstep * ITEM_SORTING_LEVEL_STEP, 1);
                     uint32 maxlvl = (lstep + 1) * ITEM_SORTING_LEVEL_STEP - 1;
-                    TC_LOG_WARN("server.loading", "No items for class %u slot %u at levels %u-%u!", c, s, minlvl, maxlvl);
+                    TC_LOG_WARN("server.loading", "No items for class {} slot {} at levels {}-{}!", c, s, minlvl, maxlvl);
                 }
             }
         }
     }
 
-    TC_LOG_INFO("server.loading", ">> Sorted wandering bots gear in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    TC_LOG_INFO("server.loading", ">> Sorted wandering bots gear in {} ms", GetMSTimeDiffToNow(oldMSTime));
 }
 
 Item* BotDataMgr::GenerateWanderingBotItem(uint8 slot, uint8 botclass, uint8 level, std::function<bool(ItemTemplate const*)>&& check)
@@ -2276,7 +2276,7 @@ void BotDataMgr::AddNpcBotData(uint32 entry, uint32 roles, uint8 spec, uint32 fa
         return;
     }
 
-    TC_LOG_ERROR("sql.sql", "BotMgr::AddNpcBotData(): trying to add new data but entry already exists! entry = %u", entry);
+    TC_LOG_ERROR("sql.sql", "BotMgr::AddNpcBotData(): trying to add new data but entry already exists! entry = {}", entry);
 }
 NpcBotData const* BotDataMgr::SelectNpcBotData(uint32 entry)
 {
@@ -2440,7 +2440,7 @@ void BotDataMgr::UpdateNpcBotData(uint32 entry, NpcBotDataUpdateType updateType,
             break;
         }
         default:
-            TC_LOG_ERROR("sql.sql", "BotDataMgr:UpdateNpcBotData: unhandled updateType %u", uint32(updateType));
+            TC_LOG_ERROR("sql.sql", "BotDataMgr:UpdateNpcBotData: unhandled updateType {}", uint32(updateType));
             break;
     }
 }
@@ -2467,7 +2467,7 @@ void BotDataMgr::UpdateNpcBotDataAll(uint32 playerGuid, NpcBotDataUpdateType upd
         //case NPCBOT_UPDATE_FACTION:
         //case NPCBOT_UPDATE_EQUIPS:
         default:
-            TC_LOG_ERROR("sql.sql", "BotDataMgr:UpdateNpcBotDataAll: unhandled updateType %u", uint32(updateType));
+            TC_LOG_ERROR("sql.sql", "BotDataMgr:UpdateNpcBotDataAll: unhandled updateType {}", uint32(updateType));
             break;
     }
 }
@@ -2587,29 +2587,29 @@ void BotDataMgr::RegisterBot(Creature const* bot)
 {
     if (_existingBots.find(bot) != _existingBots.end())
     {
-        TC_LOG_ERROR("entities.unit", "BotDataMgr::RegisterBot: bot %u (%s) already registered!",
-            bot->GetEntry(), bot->GetName().c_str());
+        TC_LOG_ERROR("entities.unit", "BotDataMgr::RegisterBot: bot {} ({}) already registered!",
+            bot->GetEntry(), bot->GetName());
         return;
     }
 
     std::unique_lock<std::shared_mutex> lock(*GetLock());
 
     _existingBots.insert(bot);
-    //TC_LOG_ERROR("entities.unit", "BotDataMgr::RegisterBot: registered bot %u (%s)", bot->GetEntry(), bot->GetName().c_str());
+    //TC_LOG_ERROR("entities.unit", "BotDataMgr::RegisterBot: registered bot {} ({})", bot->GetEntry(), bot->GetName());
 }
 void BotDataMgr::UnregisterBot(Creature const* bot)
 {
     if (_existingBots.find(bot) == _existingBots.end())
     {
-        TC_LOG_ERROR("entities.unit", "BotDataMgr::UnregisterBot: bot %u (%s) not found!",
-            bot->GetEntry(), bot->GetName().c_str());
+        TC_LOG_ERROR("entities.unit", "BotDataMgr::UnregisterBot: bot {} ({}) not found!",
+            bot->GetEntry(), bot->GetName());
         return;
     }
 
     std::unique_lock<std::shared_mutex> lock(*GetLock());
 
     _existingBots.erase(bot);
-    //TC_LOG_ERROR("entities.unit", "BotDataMgr::UnregisterBot: unregistered bot %u (%s)", bot->GetEntry(), bot->GetName().c_str());
+    //TC_LOG_ERROR("entities.unit", "BotDataMgr::UnregisterBot: unregistered bot {} ({})", bot->GetEntry(), bot->GetName());
 }
 Creature const* BotDataMgr::FindBot(uint32 entry)
 {

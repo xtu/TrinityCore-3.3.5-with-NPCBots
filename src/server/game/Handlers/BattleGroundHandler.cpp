@@ -287,8 +287,8 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
                 if (!bot || !grp->IsMember(bot->GetGUID()))
                     continue;
 
-                TC_LOG_DEBUG("bg.battleground", "Battleground: NPCBot joined queue for bg queue type %u bg type %u: GUID %s, NAME %s (owner: %s)",
-                    bgQueueTypeId, bgTypeId, bot->GetGUID().ToString().c_str(), bot->GetName().c_str(), member->GetName().c_str());
+                TC_LOG_DEBUG("bg.battleground", "Battleground: NPCBot joined queue for bg queue type {} bg type {}: GUID {}, NAME {} (owner: {})",
+                    bgQueueTypeId, bgTypeId, bot->GetGUID().ToString(), bot->GetName(), member->GetName());
             }
             //end npcbot
         }

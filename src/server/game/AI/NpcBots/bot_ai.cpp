@@ -19,6 +19,7 @@
 #include "CharacterCache.h"
 #include "CharacterDatabase.h"
 #include "Chat.h"
+#include "Containers.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
 #include "GameEventMgr.h"
@@ -288,7 +289,7 @@ bot_ai::bot_ai(Creature* creature) : CreatureAI(creature)
 }
 bot_ai::~bot_ai()
 {
-    TC_LOG_INFO("scripts", "bot_ai destructor call for %s (%u)", me->GetName().c_str(), me->GetEntry());
+    TC_LOG_INFO("scripts", "bot_ai destructor call for {} ({})", me->GetName(), me->GetEntry());
 
     while (!_spells.empty())
     {
@@ -335,7 +336,7 @@ const std::string& bot_ai::LocalizedNpcText(Player const* forPlayer, uint32 text
 
         if (!unk_botstrings.count(textId))
         {
-            TC_LOG_ERROR("entities.player", "NPCBots: bot text string #%u is not localized, at least for %s",
+            TC_LOG_ERROR("entities.player", "NPCBots: bot text string #{} is not localized, at least for {}",
                 textId, localeNames[loc]);
 
             std::ostringstream msg;
@@ -426,14 +427,14 @@ bool bot_ai::SetBotOwner(Player* newowner)
     //have master already
     if (master->GetGUID() != me->GetGUID())
     {
-        TC_LOG_ERROR("entities.player", "bot_ai::SetBotOwner(): bot %s (id: %u) has master %s while trying to set to %s...",
-            me->GetName().c_str(), me->GetEntry(), master->GetName().c_str(), newowner->GetName().c_str());
+        TC_LOG_ERROR("entities.player", "bot_ai::SetBotOwner(): bot {} (id: {}) has master {} while trying to set to {}...",
+            me->GetName(), me->GetEntry(), master->GetName(), newowner->GetName());
         return false;
     }
     if (!IAmFree())
     {
-        TC_LOG_ERROR("entities.player", "bot_ai::SetBotOwner(): minion bot %s (id: %u) IS NOT FREE (has master %s) while trying to set to %s",
-            me->GetName().c_str(), me->GetEntry(), master->GetName().c_str(), newowner->GetName().c_str());
+        TC_LOG_ERROR("entities.player", "bot_ai::SetBotOwner(): minion bot {} (id: {}) IS NOT FREE (has master {}) while trying to set to {}",
+            me->GetName(), me->GetEntry(), master->GetName(), newowner->GetName());
         return false;
     }
 
@@ -488,8 +489,8 @@ void bot_ai::CheckOwnerExpiry()
     {
         std::string name = "unknown";
         sCharacterCache->GetCharacterNameByGuid(ownerGuid, name);
-        TC_LOG_DEBUG("server.loading", ">> %s's (guid: %u) ownership over bot %s (%u) has expired!",
-            name.c_str(), npcBotData->owner, me->GetName().c_str(), me->GetEntry());
+        TC_LOG_DEBUG("server.loading", ">> {}'s (guid: {}) ownership over bot {} ({}) has expired!",
+            name, npcBotData->owner, me->GetName(), me->GetEntry());
 
         //send all items back
         CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_NPCBOT_EQUIP_BY_ITEM_INSTANCE);
@@ -678,8 +679,8 @@ SpellCastResult bot_ai::CheckBotCast(Unit const* victim, uint32 spellId) const
         {
             if (spellInfo->_effects[i].Effect == SPELL_EFFECT_APPLY_AURA && spellInfo->IsPositiveEffect(i))
             {
-                //TC_LOG_ERROR("scripts", "CheckBotCast(): deny cast of %s by %s on low-level target %s (lvl %u)",
-                //    spellInfo->SpellName[0], me->GetName().c_str(), victim->GetName().c_str(), victim->GetLevel());
+                //TC_LOG_ERROR("scripts", "CheckBotCast(): deny cast of {} by {} on low-level target {} (lvl {})",
+                //    spellInfo->SpellName[0], me->GetName(), victim->GetName(), victim->GetLevel());
                 return SPELL_FAILED_LOWLEVEL;
             }
         }
@@ -757,7 +758,7 @@ SpellCastResult bot_ai::CheckBotCast(Unit const* victim, uint32 spellId) const
         case BOT_CLASS_CRYPT_LORD:
             break;
         default:
-            TC_LOG_ERROR("entities.player", "CheckBotCast(): Unknown bot class %u", _botclass);
+            TC_LOG_ERROR("entities.player", "CheckBotCast(): Unknown bot class {}", _botclass);
             break;
     }
 
@@ -827,8 +828,8 @@ bool bot_ai::doCast(Unit* victim, uint32 spellId, TriggerCastFlags flags)
         !m_botSpellInfo->HasEffect(SPELL_EFFECT_RESURRECT_NEW) &&
         !m_botSpellInfo->HasEffect(SPELL_EFFECT_SELF_RESURRECT))
     {
-        TC_LOG_DEBUG("npcbots", "bot_ai::doCast(): %s (bot class %u) tried to cast spell %u on a dead target %s",
-            me->GetName().c_str(), _botclass, spellId, victim->GetName().c_str());
+        TC_LOG_DEBUG("npcbots", "bot_ai::doCast(): {} (bot class {}) tried to cast spell {} on a dead target {}",
+            me->GetName(), _botclass, spellId, victim->GetName());
         //return false;
     }
 
@@ -903,7 +904,7 @@ bool bot_ai::doCast(Unit* victim, uint32 spellId, TriggerCastFlags flags)
     }
 
     //debug
-    //TC_LOG_ERROR("entities.player", "CheckBotCast(): %s (%u) by %s on %s", m_botSpellInfo->SpellName[0], spellId, me->GetName().c_str(), victim->GetName().c_str());
+    //TC_LOG_ERROR("entities.player", "CheckBotCast(): {} ({}) by {} on {}", m_botSpellInfo->SpellName[0], spellId, me->GetName(), victim->GetName());
 
     bool triggered = !!(flags & TRIGGERED_CAST_DIRECTLY);
     SpellCastTargets targets;
@@ -913,8 +914,8 @@ bool bot_ai::doCast(Unit* victim, uint32 spellId, TriggerCastFlags flags)
 /*
     SpellCastResult result = spell->CheckCast(true);
     if (result != SPELL_CAST_OK)
-        TC_LOG_ERROR("entities.player", "doCast(): %s (%u) by %s on %s failed with %u",
-        m_botSpellInfo->SpellName[0], spellId, me->GetName().c_str(), victim->GetName().c_str(), uint32(result));
+        TC_LOG_ERROR("entities.player", "doCast(): {} ({}) by {} on {} failed with {}",
+        m_botSpellInfo->SpellName[0], spellId, me->GetName(), victim->GetName(), uint32(result));
 */
     bool casted = triggered; //triggered casts are casted immediately
     for (uint8 i = 0; i != CURRENT_MAX_SPELL; ++i)
@@ -934,7 +935,7 @@ bool bot_ai::doCast(Unit* victim, uint32 spellId, TriggerCastFlags flags)
             _orders.front().params.spellCastParams.baseSpell == m_botSpellInfo->GetFirstRankSpell()->Id)
         {
             if (DEBUG_BOT_ORDERS)
-                TC_LOG_ERROR("entities.player", "doCast(): ordered spell %u is not casted!", m_botSpellInfo->Id);
+                TC_LOG_ERROR("entities.player", "doCast(): ordered spell {} is not casted!", m_botSpellInfo->Id);
             CancelOrder(_orders.front());
         }
 
@@ -1133,7 +1134,7 @@ void bot_ai::BotMovement(BotMovementType type, Position const* pos, Unit* target
             mover->GetMotionMaster()->Add(new PointMovementGenerator<Creature>(1, pos->m_positionX, pos->m_positionY, pos->m_positionZ, generatePath, speed));
             break;
         default:
-            TC_LOG_ERROR("scripts", "BotMovement: unhandled bot movement type %u", uint32(type));
+            TC_LOG_ERROR("scripts", "BotMovement: unhandled bot movement type {}", uint32(type));
             return;
     }
 }
@@ -1615,7 +1616,7 @@ void bot_ai::ResurrectGroup(uint32 spell_id)
     if (int32(me->GetPower(spellInfo->PowerType)) < spellInfo->CalcPowerCost(me, spellInfo->GetSchoolMask()))
         return;
 
-    //TC_LOG_ERROR("entities.player", "ResurrectGroup by %s", me->GetName().c_str());
+    //TC_LOG_ERROR("entities.player", "ResurrectGroup by {}", me->GetName());
 
     if (IAmFree())
     {
@@ -1740,7 +1741,7 @@ void bot_ai::ResurrectGroup(uint32 spell_id)
         }
     }
 
-    //TC_LOG_ERROR("entities.unit", "ResurrectGroup: %s found %u targets", me->GetName().c_str(), uint32(bottargets.size()));
+    //TC_LOG_ERROR("entities.unit", "ResurrectGroup: {} found {} targets", me->GetName(), uint32(bottargets.size()));
 
     if (bottargets.empty())
         return;
@@ -1806,7 +1807,7 @@ void bot_ai::CureGroup(uint32 cureSpell, uint32 diff)
     if (!master->GetMap()->IsRaid() && Rand() > 35)
         return;
 
-    //TC_LOG_ERROR("entities.player", "%s: CureGroup() on %s", me->GetName().c_str(), pTarget->GetName().c_str());
+    //TC_LOG_ERROR("entities.player", "{}: CureGroup() on {}", me->GetName(), pTarget->GetName());
     std::list<Unit*> targets;
     Group const* pGroup = master->GetGroup();
     BotMap const* map;
@@ -2082,9 +2083,9 @@ void bot_ai::_listAuras(Player const* player, Unit const* unit) const
             case STAT_SPIRIT: mystat = LocalizedNpcText(player, BOT_TEXT_STAT_SPI); break;
             default: mystat = LocalizedNpcText(player, BOT_TEXT_STAT_UNK); break;
         }
-        //ch.PSendSysMessage("base %s: %.1f", mystat.c_str(), unit->GetCreateStat(Stats(i));
+        //ch.PSendSysMessage("base %s: {}", mystat, unit->GetCreateStat(Stats(i));
         float totalstat = unit->GetTotalStatValue(Stats(i));
-        //ch.PSendSysMessage("base total %s: %.1f", mystat.c_str(), totalstat);
+        //ch.PSendSysMessage("base total %s: {}", mystat, totalstat);
         if (unit == me)
         {
             BotStatMods t = MAX_BOT_ITEM_MOD;
@@ -2225,7 +2226,7 @@ void bot_ai::_listAuras(Player const* player, Unit const* unit) const
         //for (uint32 i = 0; i != 148; ++i)
         //{
         //    float val = me->GetFloatValue(i);
-        //    ch.PSendSysMessage("Float value at %u: %.9f", i, val);
+        //    ch.PSendSysMessage("Float value at %u: {}", i, val);
         //}
 
         //ch.PSendSysMessage("healTargetIconFlags: %u", healTargetIconFlags);
@@ -2293,9 +2294,9 @@ void bot_ai::SetStats(bool force)
             mylevel += BotDataMgr::GetLevelBonusForBotRank(me->GetCreatureTemplate()->rank);
             _baseLevel = std::max<uint8>(mylevel, BotDataMgr::GetMinLevelForBotClass(_botclass));
             if (me->GetMap()->IsBattlegroundOrArena())
-                TC_LOG_DEBUG("npcbots", "BG bot %s id %u selected level %u...", me->GetName().c_str(), me->GetEntry(), uint32(_baseLevel));
+                TC_LOG_DEBUG("npcbots", "BG bot {} id {} selected level {}...", me->GetName(), me->GetEntry(), uint32(_baseLevel));
             else
-                TC_LOG_DEBUG("npcbots", "Wandering bot %s id %u selected level %u...", me->GetName().c_str(), me->GetEntry(), uint32(_baseLevel));
+                TC_LOG_DEBUG("npcbots", "Wandering bot {} id {} selected level {}...", me->GetName(), me->GetEntry(), uint32(_baseLevel));
         }
         else if (me->GetMap()->GetEntry()->IsContinent())
         {
@@ -2367,7 +2368,7 @@ void bot_ai::SetStats(bool force)
             break;
 
         default:
-            TC_LOG_ERROR("entities.player", "minion_ai: *etStats():Init - unknown bot class %u, real class: %u, _botclass: %u", myclass, GetPlayerClass(), _botclass);
+            TC_LOG_ERROR("entities.player", "minion_ai: *etStats():Init - unknown bot class {}, real class: {}, _botclass: {}", myclass, GetPlayerClass(), _botclass);
             break;
     }
 
@@ -2446,7 +2447,7 @@ void bot_ai::SetStats(bool force)
         case BOT_CLASS_CRYPT_LORD:
             strmult = 9.f; agimult = 0.f; break;
         default:
-            TC_LOG_ERROR("entities.player", "_MeleeDamageUpdate(): NIY myclass %u!", uint32(myclass));
+            TC_LOG_ERROR("entities.player", "_MeleeDamageUpdate(): NIY myclass {}!", uint32(myclass));
             strmult = 0.f; agimult = 0.f; break;
     }
 
@@ -3193,7 +3194,7 @@ void bot_ai::SetStats(bool force)
 
         if (_botclass == BOT_CLASS_SEA_WITCH && IsInContactWithWater())
         {
-            //TC_LOG_ERROR("scripts", "BOT_CLASS_SEA_WITCH dodge: %s now in water", me->GetName().c_str());
+            //TC_LOG_ERROR("scripts", "BOT_CLASS_SEA_WITCH dodge: {} now in water", me->GetName());
             value += 50.f;
         }
 
@@ -3592,23 +3593,23 @@ void bot_ai::RefreshAura(uint32 spellId, int8 count, Unit* target) const
 {
     if (count < 0 || count > 1)
     {
-        TC_LOG_ERROR("entities.player", "bot_ai::RefreshAura(): count is out of bounds (%i) for bot %s (botclass: %u, entry: %u)",
-            int32(count), me->GetName().c_str(), uint32(_botclass), me->GetEntry());
+        TC_LOG_ERROR("entities.player", "bot_ai::RefreshAura(): count is out of bounds ({}) for bot {} (botclass: {}, entry: {})",
+            int32(count), me->GetName(), uint32(_botclass), me->GetEntry());
         return;
     }
 
     if (!spellId)
     {
-        TC_LOG_ERROR("entities.player", "bot_ai::RefreshAura(): spellId is 0 for bot %s (botclass: %u, entry: %u)",
-            me->GetName().c_str(), uint32(_botclass), me->GetEntry());
+        TC_LOG_ERROR("entities.player", "bot_ai::RefreshAura(): spellId is 0 for bot {} (botclass: {}, entry: {})",
+            me->GetName(), uint32(_botclass), me->GetEntry());
         return;
     }
 
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
     {
-        TC_LOG_ERROR("entities.player", "bot_ai::RefreshAura(): Invalid spellInfo for spell %u! Bot - %s (botclass: %u, entry: %u)",
-            spellId, me->GetName().c_str(), uint32(_botclass), me->GetEntry());
+        TC_LOG_ERROR("entities.player", "bot_ai::RefreshAura(): Invalid spellInfo for spell {}! Bot - {} (botclass: {}, entry: {})",
+            spellId, me->GetName(), uint32(_botclass), me->GetEntry());
         return;
     }
     spellInfo = spellInfo->TryGetSpellInfoOverride(me);
@@ -3780,7 +3781,7 @@ Unit* bot_ai::_getVehicleTarget(BotVehicleStrats /*strat*/) const
                         if (unit->IsVisible() && unit->isTargetableForAttack(false) && me->IsValidAttackTarget(unit) &&
                             unit->IsInCombat() && (CanSeeEveryone() || (me->CanSeeOrDetect(unit) && unit->InSamePhase(me))))
                         {
-                            //TC_LOG_ERROR("entities.unit", "_getTarget: found dps icon target %s", unit->GetName().c_str());
+                            //TC_LOG_ERROR("entities.unit", "_getTarget: found dps icon target {}", unit->GetName());
                             return unit;
                         }
                     }
@@ -3821,8 +3822,8 @@ Unit* bot_ai::_getVehicleTarget(BotVehicleStrats /*strat*/) const
         {
             //if (mytar)
             //{
-            //    TC_LOG_ERROR("scripts", "_getVehicleTarget %s's veh is too far from master - lost target (%.2f > %.2f)",
-            //        me->GetName().c_str(), veh->GetDistance(mmover), followdist);
+            //    TC_LOG_ERROR("scripts", "_getVehicleTarget {}'s veh is too far from master - lost target ({} > {})",
+            //        me->GetName(), veh->GetDistance(mmover), followdist);
             //}
             return nullptr;
         }
@@ -3852,7 +3853,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
     Unit* mytar = me->GetVictim();
 
     //check if no need to change target
-    //TC_LOG_ERROR("entities.player", "bot_ai::getTarget(): bot: %s", me->GetName().c_str());
+    //TC_LOG_ERROR("entities.player", "bot_ai::getTarget(): bot: {}", me->GetName());
 
     if (mytar && me->HasAuraType(SPELL_AURA_MOD_TAUNT))
         return { mytar, mytar };
@@ -4057,7 +4058,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
                 {
                     if (mytar && mytar->GetGUID() == guid && mytar->GetVictim() == me)
                     {
-                        //TC_LOG_ERROR("entities.unit", "_getTarget: %s continues %s", me->GetName().c_str(), mytar->GetName().c_str());
+                        //TC_LOG_ERROR("entities.unit", "_getTarget: {} continues {}", me->GetName(), mytar->GetName());
                         return { mytar, mytar };
                     }
 
@@ -4066,13 +4067,13 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
                         if (unit->IsVisible() && unit->isTargetableForAttack(false) && me->IsValidAttackTarget(unit) &&
                             unit->IsInCombat() && (CanSeeEveryone() || (me->CanSeeOrDetect(unit) && unit->InSamePhase(me))))
                         {
-                            //TC_LOG_ERROR("entities.unit", "_getTarget: %s found new offtanking icon target %s", me->GetName().c_str(), unit->GetName().c_str());
+                            //TC_LOG_ERROR("entities.unit", "_getTarget: {} found new offtanking icon target {}", me->GetName(), unit->GetName());
                             Unit* tempTar = tankTar ? tankTar : unit;
                             tankTar = unit;
                             Unit* tVic = unit->GetVictim();
                             if (!tVic || (tVic != me && tVic->GetVictim() == unit && IsTank(tVic) && IsInBotParty(tVic)))
                             {
-                                //TC_LOG_ERROR("entities.unit", "_getTarget: %s skipped %s (%s)", me->GetName().c_str(), unit->GetName().c_str(), tVic->GetName().c_str());
+                                //TC_LOG_ERROR("entities.unit", "_getTarget: {} skipped {} ({})", me->GetName(), unit->GetName(), tVic->GetName());
                                 tankTar = tempTar;
                                 continue;
                             }
@@ -4083,7 +4084,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
         }
         if (tankTar)
         {
-            //TC_LOG_ERROR("entities.unit", "_getTarget: %s returning %s", me->GetName().c_str(), tankTar->GetName().c_str());
+            //TC_LOG_ERROR("entities.unit", "_getTarget: {} returning {}", me->GetName(), tankTar->GetName());
             return { tankTar, tankTar };
         }
     }
@@ -4119,7 +4120,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
                 {
                     if (mytar && mytar->GetGUID() == guid && mytar->GetVictim() == me)
                     {
-                        //TC_LOG_ERROR("entities.unit", "_getTarget: %s continues %s", me->GetName().c_str(), mytar->GetName().c_str());
+                        //TC_LOG_ERROR("entities.unit", "_getTarget: {} continues {}", me->GetName(), mytar->GetName());
                         return { mytar, mytar };
                     }
 
@@ -4128,13 +4129,13 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
                         if (unit->IsVisible() && unit->isTargetableForAttack(false) && me->IsValidAttackTarget(unit) &&
                             unit->IsInCombat() && (CanSeeEveryone() || (me->CanSeeOrDetect(unit) && unit->InSamePhase(me))))
                         {
-                            //TC_LOG_ERROR("entities.unit", "_getTarget: %s found new mtanking icon target %s", me->GetName().c_str(), unit->GetName().c_str());
+                            //TC_LOG_ERROR("entities.unit", "_getTarget: {} found new mtanking icon target {}", me->GetName(), unit->GetName());
                             Unit* tempTar = tankTar ? tankTar : unit;
                             tankTar = unit;
                             Unit* tVic = unit->GetVictim();
                             if (!tVic || (tVic != me && tVic->GetVictim() == unit && IsTank(tVic) && IsInBotParty(tVic)))
                             {
-                                //TC_LOG_ERROR("entities.unit", "_getTarget: %s skipped %s (%s)", me->GetName().c_str(), unit->GetName().c_str(), tVic->GetName().c_str());
+                                //TC_LOG_ERROR("entities.unit", "_getTarget: {} skipped {} ({})", me->GetName(), unit->GetName(), tVic->GetName());
                                 tankTar = tempTar;
                                 continue;
                             }
@@ -4145,7 +4146,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
         }
         if (tankTar)
         {
-            //TC_LOG_ERROR("entities.unit", "_getTarget: %s returning %s", me->GetName().c_str(), tankTar->GetName().c_str());
+            //TC_LOG_ERROR("entities.unit", "_getTarget: {} returning {}", me->GetName(), tankTar->GetName());
             return { tankTar, tankTar };
         }
     }
@@ -4192,7 +4193,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
                         if (unit->IsVisible() && unit->isTargetableForAttack(false) && me->IsValidAttackTarget(unit) &&
                             unit->IsInCombat() && (CanSeeEveryone() || (me->CanSeeOrDetect(unit) && unit->InSamePhase(me))))
                         {
-                            //TC_LOG_ERROR("entities.unit", "_getTarget: found rdps icon target %s", unit->GetName().c_str());
+                            //TC_LOG_ERROR("entities.unit", "_getTarget: found rdps icon target {}", unit->GetName());
                             return { unit, unit };
                         }
                     }
@@ -4207,7 +4208,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
                         if (unit->IsVisible() && unit->isTargetableForAttack(false) && me->IsValidAttackTarget(unit) &&
                             unit->IsInCombat() && (CanSeeEveryone() || (me->CanSeeOrDetect(unit) && unit->InSamePhase(me))))
                         {
-                            //TC_LOG_ERROR("entities.unit", "_getTarget: found dps icon target %s", unit->GetName().c_str());
+                            //TC_LOG_ERROR("entities.unit", "_getTarget: found dps icon target {}", unit->GetName());
                             return { unit, unit };
                         }
                     }
@@ -4256,7 +4257,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
 */
     if (u && u == mytar && !IAmFree() && u->GetTypeId() == TYPEID_PLAYER && CanBotAttack(u, byspell))
     {
-        //TC_LOG_ERROR("entities.player", "bot %s continues attack common target %s", me->GetName().c_str(), u->GetName().c_str());
+        //TC_LOG_ERROR("entities.player", "bot {} continues attack common target {}", me->GetName(), u->GetName());
         return { u, u };//forced
     }
     //Follow if...
@@ -4267,7 +4268,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
     if (!IAmFree() && IsRanged())
     {
         _extendAttackRange(foldist);
-        //TC_LOG_ERROR("entities.player", "bot %s ranged foldist %.2f spelldist %.2f", me->GetName().c_str(), foldist, spelldist);
+        //TC_LOG_ERROR("entities.player", "bot {} ranged foldist {} spelldist {}", me->GetName(), foldist, spelldist);
     }
     bool dropTarget = followdist == 0 && master->IsAlive();
     if (!dropTarget && (!u || IAmFree()) && master->IsAlive() && mytar && mytar == opponent)
@@ -4280,14 +4281,14 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
     }
     if (dropTarget)
     {
-        //TC_LOG_ERROR("entities.player", "bot %s cannot attack target %s, too far away or not in LoS", me->GetName().c_str(), mytar ? mytar->GetName().c_str() : "unk");
+        //TC_LOG_ERROR("entities.player", "bot {} cannot attack target {}, too far away or not in LoS", me->GetName(), mytar ? mytar->GetName() : "unk");
         mytar = nullptr;
     }
 
     if (u && !IAmFree() && (master->IsInCombat() || u->IsInCombat())/* && !InDuel(u)*/ && !IsInBotParty(u) && (BotMgr::IsPvPEnabled() || !u->IsControlledByPlayer()) &&
         (!HasBotCommandState(BOT_COMMAND_STAY) || (!IsRanged() ? me->IsWithinMeleeRange(u) : me->GetDistance(u) < foldist)))
     {
-        //TC_LOG_ERROR("entities.player", "bot %s starts attack master's target %s", me->GetName().c_str(), u->GetName().c_str());
+        //TC_LOG_ERROR("entities.player", "bot {} starts attack master's target {}", me->GetName(), u->GetName());
         return { u, u };
     }
 
@@ -4295,7 +4296,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
     if (mytar && (!IAmFree() || me->GetDistance(mytar) < BOT_MAX_CHASE_RANGE) && canAttack &&/* !InDuel(mytar) &&*/
         !(mytar->GetVictim() != nullptr && IsTank() && IsTank(mytar->GetVictim())))
     {
-        //TC_LOG_ERROR("entities.player", "bot %s continues attack its target %s", me->GetName().c_str(), mytar->GetName().c_str());
+        //TC_LOG_ERROR("entities.player", "bot {} continues attack its target {}", me->GetName(), mytar->GetName());
         if (me->GetDistance(mytar) > (ranged ? 20.f : 5.f) && !HasBotCommandState(BOT_COMMAND_MASK_UNCHASE))
             reset = true;
         return { mytar, mytar };
@@ -4315,7 +4316,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
                 u = bot->GetVictim();
                 if (u && (bot->IsInCombat() || u->IsInCombat()) && CanBotAttack(u, byspell))
                 {
-                    //TC_LOG_ERROR("entities.player", "bot %s hooked %s's victim %s", me->GetName().c_str(), bot->GetName().c_str(), u->GetName().c_str());
+                    //TC_LOG_ERROR("entities.player", "bot {} hooked {}'s victim {}", me->GetName(), bot->GetName(), u->GetName());
                     return { u, u };
                 }
             }
@@ -4331,7 +4332,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
                 u = pl->GetVictim();
                 if (u && pl != master && (pl->IsInCombat() || u->IsInCombat()) && CanBotAttack(u, byspell))
                 {
-                    //TC_LOG_ERROR("entities.player", "bot %s hooked %s's victim %s", me->GetName().c_str(), pl->GetName().c_str(), u->GetName().c_str());
+                    //TC_LOG_ERROR("entities.player", "bot {} hooked {}'s victim {}", me->GetName(), pl->GetName(), u->GetName());
                     return { u, u };
                 }
                 if (!pl->HaveBot()) continue;
@@ -4346,7 +4347,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
                     u = bot->GetVictim();
                     if (u && (bot->IsInCombat() || u->IsInCombat()) && CanBotAttack(u, byspell))
                     {
-                        //TC_LOG_ERROR("entities.player", "bot %s hooked %s's victim %s", me->GetName().c_str(), bot->GetName().c_str(), u->GetName().c_str());
+                        //TC_LOG_ERROR("entities.player", "bot {} hooked {}'s victim {}", me->GetName(), bot->GetName(), u->GetName());
                         return { u, u };
                     }
                 }
@@ -4474,7 +4475,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
         t1 = mytar;
 
     //if (t)
-    //    TC_LOG_ERROR("entities.player", "bot %s has found new target %s", me->GetName().c_str(), t->GetName().c_str());
+    //    TC_LOG_ERROR("entities.player", "bot {} has found new target {}", me->GetName(), t->GetName());
 
     return { t1, t2 };
 }
@@ -4518,7 +4519,7 @@ bool bot_ai::CheckAttackTarget()
                     byspell = ranged && HasRole(BOT_ROLE_DPS);
                     break;
                 default:
-                    TC_LOG_ERROR("entities.player", "bot_ai::CheckAttackTarget(): druid has NYI bot stance %u", uint32(GetBotStance()));
+                    TC_LOG_ERROR("entities.player", "bot_ai::CheckAttackTarget(): druid has NYI bot stance {}", uint32(GetBotStance()));
                     break;
             }
             break;
@@ -4546,7 +4547,7 @@ bool bot_ai::CheckAttackTarget()
         case BOT_CLASS_CRYPT_LORD:
             break;
         default:
-            TC_LOG_ERROR("entities.player", "bot_ai: CheckAttackTarget() - unknown bot class %u", _botclass);
+            TC_LOG_ERROR("entities.player", "bot_ai: CheckAttackTarget() - unknown bot class {}", _botclass);
             return false;
     }
 
@@ -4554,10 +4555,10 @@ bool bot_ai::CheckAttackTarget()
 
     if (!opponent && !disttarget)
     {
-        //TC_LOG_ERROR("entities.player", "bot_ai: CheckAttackTarget() - bot %s lost target", me->GetName().c_str());
+        //TC_LOG_ERROR("entities.player", "bot_ai: CheckAttackTarget() - bot {} lost target", me->GetName());
         if (me->GetVictim() || me->IsInCombat()/* || !me->GetThreatManager().isThreatListEmpty()*/)
         {
-            //TC_LOG_ERROR("entities.player", "bot_ai: CheckAttackTarget() - bot %s Evades", me->GetName().c_str());
+            //TC_LOG_ERROR("entities.player", "bot_ai: CheckAttackTarget() - bot {} Evades", me->GetName());
             if (me->GetVictim())
                 me->AttackStop();
             else if (me->IsInCombat())
@@ -4906,7 +4907,7 @@ void bot_ai::CalculateAoeSpots(Unit const* unit, AoeSpotsVec& spots)
     Cell::VisitAllObjects(unit, searcher, 60.f);
 
     //if (!doList.empty())
-    //    TC_LOG_ERROR("scripts", "CalculateAoeSpots %u aoes around %s", uint32(doList.size()), unit->GetName().c_str());
+    //    TC_LOG_ERROR("scripts", "CalculateAoeSpots {} aoes around {}", uint32(doList.size()), unit->GetName());
 
     //filter and add to list
     DynamicObject const* dObj;
@@ -4919,8 +4920,8 @@ void bot_ai::CalculateAoeSpots(Unit const* unit, AoeSpotsVec& spots)
         spellInfo = sSpellMgr->GetSpellInfo(dObj->GetSpellId());
         if (IsPeriodicDynObjAOEDamage(spellInfo))
         {
-            //TC_LOG_ERROR("scripts", "CalculateAoeSpots found %s's aoe %s (%u) radius %.2f size %.2f",
-            //    dObj->GetCaster()->GetName().c_str(), spellInfo->SpellName[0], spellInfo->Id, dObj->GetRadius(), dObj->GetObjectSize());
+            //TC_LOG_ERROR("scripts", "CalculateAoeSpots found {}'s aoe {} ({}) radius {} size {}",
+            //    dObj->GetCaster()->GetName(), spellInfo->SpellName[0], spellInfo->Id, dObj->GetRadius(), dObj->GetObjectSize());
 
             float radius = dObj->GetRadius() + DEFAULT_PLAYER_BOUNDING_RADIUS;
             radius += (unit->GetVehicle() ? unit->GetVehicleBase()->GetCombatReach() : DEFAULT_PLAYER_COMBAT_REACH) * 1.2f;
@@ -5216,7 +5217,7 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
             }
             if (isinaoe)
             {
-                //TC_LOG_ERROR("scripts", "CalculateAttackPos %s veh skipped aoe pos", me->GetName().c_str());
+                //TC_LOG_ERROR("scripts", "CalculateAttackPos {} veh skipped aoe pos", me->GetName());
                 if (me->GetVehicleBase()->CanFly())
                     ppos.m_positionZ += (master->GetPositionZ() < target->GetPositionZ()) ? -8.f : 8.f;
                 else
@@ -5246,7 +5247,7 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
         if (!toofaraway && !outoflos && !isinaoe && canattack)
         {
             //if (!aoespots.empty())
-            //    TC_LOG_ERROR("scripts", "CalculateAttackPos %s spot is still safe", me->GetName().c_str());
+            //    TC_LOG_ERROR("scripts", "CalculateAttackPos {} spot is still safe", me->GetName());
 
             pos.Relocate(ppos);
             return;
@@ -5300,7 +5301,7 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
             }
         }
 
-        //TC_LOG_ERROR("scripts", "CalculateAttackPos %u safe spots, chosen at dist %.2f", uint32(safespots.size()), mindist);
+        //TC_LOG_ERROR("scripts", "CalculateAttackPos {} safe spots, chosen at dist {}", uint32(safespots.size()), mindist);
         pos.Relocate(closestAttackPos ? closestAttackPos : closestPos ? closestPos : me);
         force = true;
         return;
@@ -5369,8 +5370,8 @@ void bot_ai::GetInPosition(bool force, Unit* newtarget, Position* mypos)
             attackpos.m_positionY = mypos->m_positionY;
             attackpos.m_positionZ = mypos->m_positionZ;
         }
-        //TC_LOG_ERROR("scripts", "GetInPosition %s to %s dist %.2f, to pos %.2f", me->GetName().c_str(),
-        //    newtarget->GetName().c_str(), me->GetExactDist2d(newtarget), me->GetExactDist2d(&attackpos));
+        //TC_LOG_ERROR("scripts", "GetInPosition {} to {} dist {}, to pos {}", me->GetName(),
+        //    newtarget->GetName(), me->GetExactDist2d(newtarget), me->GetExactDist2d(&attackpos));
         if (mover->GetExactDist2d(&attackpos) > (force ? 0.1f : 4.f))
         {
             BotMovement(BOT_MOVE_POINT, &attackpos);
@@ -5426,7 +5427,7 @@ bool bot_ai::AdjustTankingPosition(Unit const* mytarget) const
             return false;
     }
 
-    //TC_LOG_ERROR("entities.player", "AdjustTankPosition() by %s", me->GetName().c_str());
+    //TC_LOG_ERROR("entities.player", "AdjustTankPosition() by {}", me->GetName());
 
     uint32 bCount = 0;
     for (Unit::AttackerSet::const_iterator itr = myattackers.begin(); itr != myattackers.end(); ++itr)
@@ -5440,7 +5441,7 @@ bool bot_ai::AdjustTankingPosition(Unit const* mytarget) const
     if (bCount == 0)
         return false;
 
-    //TC_LOG_ERROR("entities.player", "AdjustTankPosition(): atts %u, behind %u", uint32(myattackers.size()), bCount);
+    //TC_LOG_ERROR("entities.player", "AdjustTankPosition(): atts {}, behind {}", uint32(myattackers.size()), bCount);
 
     //calculate new position
     float x = me->GetPositionX();
@@ -6100,8 +6101,8 @@ void bot_ai::CheckUsableItems(uint32 diff)
                         break;
                 }
 
-                //TC_LOG_ERROR("scripts", "bot_ai::CheckUsableItems(): bot %s, slot %u, spell %u, target %u",
-                //    me->GetName().c_str(), uint32(slot), firstItemSpellId, targetType);
+                //TC_LOG_ERROR("scripts", "bot_ai::CheckUsableItems(): bot {}, slot {}, spell {}, target {}",
+                //    me->GetName(), uint32(slot), firstItemSpellId, targetType);
 
                 if (!castTarget)
                     continue;
@@ -6117,7 +6118,7 @@ void bot_ai::CheckUsableItems(uint32 diff)
                 break;
             }
             else
-                TC_LOG_ERROR("scripts", "bot_ai::CheckUsableItems(): slot %u is in mask but no item exists in that slot!", uint32(slot));
+                TC_LOG_ERROR("scripts", "bot_ai::CheckUsableItems(): slot {} is in mask but no item exists in that slot!", uint32(slot));
         }
     }
 }
@@ -6204,7 +6205,7 @@ Unit* bot_ai::FindAffectedTarget(uint32 spellId, ObjectGuid caster, float dist, 
         return nullptr;
     if ((hostile == 2 || hostile == 1)/* && IAmFree()*/)
     {
-        TC_LOG_ERROR("entities.player", "bot_ai::FindAffectedTarget(): hostile = %u Setting to ALL...", hostile);
+        TC_LOG_ERROR("entities.player", "bot_ai::FindAffectedTarget(): hostile = {} Setting to ALL...", hostile);
         hostile = 255;
     }
     if (master->GetMap()->Instanceable())
@@ -6516,7 +6517,7 @@ uint32 bot_ai::InitSpell(Unit const* caster, uint32 spell)
     SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
     if (!info)
     {
-        TC_LOG_ERROR("entities.player", "InitSpell(): No SpellInfo found for spell %u", spell);
+        TC_LOG_ERROR("entities.player", "InitSpell(): No SpellInfo found for spell {}", spell);
         return 0; //weird spell with no info, disable it
     }
 
@@ -6540,7 +6541,7 @@ void bot_ai::InitSpellMap(uint32 basespell, bool forceadd, bool forwardRank)
     SpellInfo const* info = sSpellMgr->GetSpellInfo(basespell);
     if (!info)
     {
-        TC_LOG_ERROR("entities.player", "bot_ai::InitSpellMap(): No SpellInfo found for base spell %u", basespell);
+        TC_LOG_ERROR("entities.player", "bot_ai::InitSpellMap(): No SpellInfo found for base spell {}", basespell);
         return; //invalid spell id
     }
     info = info->TryGetSpellInfoOverride(me);
@@ -6567,8 +6568,8 @@ void bot_ai::InitSpellMap(uint32 basespell, bool forceadd, bool forwardRank)
     if (npcBotData && npcBotData->disabled_spells.find(basespell) != npcBotData->disabled_spells.end())
     {
         newSpell->enabled = false;
-        //TC_LOG_ERROR("entities.player", "bot_ai::InitSpellMap(): %s (%u -> %u) is disabled for %s!",
-        //    sSpellMgr->GetSpellInfo(basespell)->SpellName[0], basespell, spellId, me->GetName().c_str());
+        //TC_LOG_ERROR("entities.player", "bot_ai::InitSpellMap(): {} ({} -> {}) is disabled for {}!",
+        //    sSpellMgr->GetSpellInfo(basespell)->SpellName[0], basespell, spellId, me->GetName());
     }
 }
 //Using first-rank spell as source, return true if spell is inited
@@ -6670,7 +6671,7 @@ void bot_ai::SetSpellCategoryCooldown(SpellInfo const* spellInfo, uint32 msCoold
         {
             //if (itr->first != 7814) // Lash of Pain
             {
-                TC_LOG_ERROR("scripts", "Warning: SetSpellCategoryCooldown: %u has baseId %u but category %u, not %u!",
+                TC_LOG_ERROR("scripts", "Warning: SetSpellCategoryCooldown: {} has baseId {} but category {}, not {}!",
                     info->Id, itr->first, info->GetCategory(), category);
             }
         }
@@ -6687,7 +6688,7 @@ void bot_ai::ReleaseSpellCooldown(uint32 basespell)
 
     if (!baseInfo->IsCooldownStartedOnEvent())
     {
-        TC_LOG_ERROR("spells", "bot_ai::ReleaseSpellCooldown is called for wrong spell %u!", basespell);
+        TC_LOG_ERROR("spells", "bot_ai::ReleaseSpellCooldown is called for wrong spell {}!", basespell);
         return;
     }
 
@@ -6788,12 +6789,12 @@ uint32 bot_ai::RaceSpellForClass(uint8 myrace, uint8 myclass)
                 case BOT_CLASS_MAGE:
                     return RACIAL_GIFT_OF_NAARU_MAGE;
                 default:
-                    TC_LOG_ERROR("entities.player", "RaceSpellForClass(): unknows race:class combo %u, %u", uint32(myrace), uint32(myclass));
+                    TC_LOG_ERROR("entities.player", "RaceSpellForClass(): unknows race:class combo {}, {}", uint32(myrace), uint32(myclass));
                     return 0;
             }
             break;
         default:
-            TC_LOG_ERROR("entities.player", "RaceSpellForClass(): unknows race:class combo %u, %u", uint32(myrace), uint32(myclass));
+            TC_LOG_ERROR("entities.player", "RaceSpellForClass(): unknows race:class combo {}, {}", uint32(myrace), uint32(myclass));
             return 0;
     }
 }
@@ -6805,11 +6806,11 @@ void bot_ai::_OnHealthUpdate() const
     uint8 mylevel = master->GetLevel();
     if (myclass == BOT_CLASS_DRUID && GetBotStance() != BOT_STANCE_NONE)
         myclass = GetBotStance();
-    //TC_LOG_ERROR("entities.player", "_OnHealthUpdate(): updating bot %s", me->GetName().c_str());
+    //TC_LOG_ERROR("entities.player", "_OnHealthUpdate(): updating bot {}", me->GetName());
     bool fullhp = me->GetHealth() == me->GetMaxHealth();
     float pct = fullhp ? 100.f : me->GetHealthPct(); // needs for regeneration
     uint32 m_basehp = uint32(_classinfo->basehealth * (BotMgr::IsWanderingWorldBot(me) ? BotMgr::GetBotWandererHPMod() : BotMgr::GetBotHPMod()));
-    //TC_LOG_ERROR("entities.player", "class base health: %u", m_basehp);
+    //TC_LOG_ERROR("entities.player", "class base health: {}", m_basehp);
     me->SetCreateHealth(m_basehp);
 
     float stamValue = _getTotalBotStat(BOT_STAT_MOD_STAMINA);
@@ -6817,13 +6818,13 @@ void bot_ai::_OnHealthUpdate() const
     stamValue -= std::min<float>(me->GetCreateStat(STAT_STAMINA), 20.f); //not a mistake
     stamValue = std::max<float>(stamValue, 0.f);
 
-    //TC_LOG_ERROR("entities.player", "bot's stats to health add: Stamina (%f), value: %f", stamValue, stamValue * 10.f);
+    //TC_LOG_ERROR("entities.player", "bot's stats to health add: Stamina ({}), value: {}", stamValue, stamValue * 10.f);
     float hp_add = stamValue * 10.f + 20; //20 is not a mistake;
     //hp_add += IAmFree() ? mylevel * 375.f : 0; //+30000/+0 hp at 80
     hp_add += _getTotalBotStat(BOT_STAT_MOD_HEALTH);
-    //TC_LOG_ERROR("entities.player", "health to add after stam mod: %i", hp_add);
+    //TC_LOG_ERROR("entities.player", "health to add after stam mod: {}", hp_add);
     uint32 m_totalhp = m_basehp + int32(hp_add * (BotMgr::IsWanderingWorldBot(me) ? BotMgr::GetBotWandererHPMod() : BotMgr::GetBotHPMod()));
-    //TC_LOG_ERROR("entities.player", "total base health: %u", m_totalhp);
+    //TC_LOG_ERROR("entities.player", "total base health: {}", m_totalhp);
 
     //hp bonuses
     uint8 bonuspct = 0;
@@ -6845,7 +6846,7 @@ void bot_ai::_OnHealthUpdate() const
     //m_totalhp = float(uint32(m_totalhp) - (uint32(m_totalhp) % 10));
     me->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(m_totalhp)); //replaces base hp at max lvl
     me->UpdateMaxHealth(); //will use our values we just set (update base health and buffs)
-    //TC_LOG_ERROR("entities.player", "overall hp: %u", me->GetMaxHealth());
+    //TC_LOG_ERROR("entities.player", "overall hp: {}", me->GetMaxHealth());
     me->SetHealth(fullhp ? me->GetMaxHealth() : uint32(0.5f + float(me->GetMaxHealth()) * pct / 100.f)); //restore pct
 }
 //Mana management for minions
@@ -6860,7 +6861,7 @@ void bot_ai::_OnManaUpdate() const
     if (myclass == BOT_CLASS_DRUID && GetBotStance() != BOT_STANCE_NONE)
         myclass = GetBotStance();
 
-    //TC_LOG_ERROR("entities.player", "_OnManaUpdate(): updating bot %s", me->GetName().c_str());
+    //TC_LOG_ERROR("entities.player", "_OnManaUpdate(): updating bot {}", me->GetName());
     bool fullmana = me->GetPower(POWER_MANA) == me->GetMaxPower(POWER_MANA);
     float pct = fullmana ? 100.f : (float(me->GetPower(POWER_MANA)) * 100.f) / float(me->GetMaxPower(POWER_MANA));
     float m_basemana = _classinfo->basemana;
@@ -6882,7 +6883,7 @@ void bot_ai::_OnManaUpdate() const
         m_basemana = BASE_MANA_1_SEA_WITCH + (BASE_MANA_10_SEA_WITCH - BASE_MANA_1_SEA_WITCH) * (mylevel/83.f);
     if (_botclass == BOT_CLASS_CRYPT_LORD)
         m_basemana = BASE_MANA_1_CRYPT_LORD + (BASE_MANA_10_CRYPT_LORD - BASE_MANA_1_CRYPT_LORD) * (mylevel/83.f);
-    //TC_LOG_ERROR("entities.player", "classinfo base mana = %f", m_basemana);
+    //TC_LOG_ERROR("entities.player", "classinfo base mana = {}", m_basemana);
 
     me->SetCreateMana(uint32(m_basemana));
 
@@ -7016,7 +7017,7 @@ void bot_ai::_UpdateWMOArea()
     if (WMOAreaTableEntry const* wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId))
     {
         _lastWMOAreaId = wmoEntry->ID;
-        //TC_LOG_ERROR("scripts", "_UpdateWMOArea(): bot %s: area %u, wmoarea %u", me->GetName().c_str(), _lastAreaId, _lastWMOAreaId);
+        //TC_LOG_ERROR("scripts", "_UpdateWMOArea(): bot {}: area {}, wmoarea {}", me->GetName(), _lastAreaId, _lastWMOAreaId);
     }
 }
 
@@ -7172,7 +7173,7 @@ void bot_ai::OnSpellHit(Unit* caster, SpellInfo const* spell)
         //remove pet on mount
         if (auraname == SPELL_AURA_MOUNTED)
         {
-            //TC_LOG_ERROR("entities.unit", "OnSpellHit: mount on %s", me->GetName().c_str());
+            //TC_LOG_ERROR("entities.unit", "OnSpellHit: mount on {}", me->GetName());
             if (!IAmFree())
                 UnsummonAll();
             if (master->HasAuraType(SPELL_AURA_MOD_INCREASE_VEHICLE_FLIGHT_SPEED) ||
@@ -7313,13 +7314,13 @@ void bot_ai::OnSpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
         if (spellId == 56091 || spellId == 57090)
         {
             vehcomboPoints = std::min(vehcomboPoints + 1, 5);
-            //TC_LOG_ERROR("scripts", "OnBotSpellGo(): veh cp spell %u now cp %u", curInfo->Id, uint32(vehcomboPoints));
+            //TC_LOG_ERROR("scripts", "OnBotSpellGo(): veh cp spell {} now cp {}", curInfo->Id, uint32(vehcomboPoints));
         }
         //Engulf in Flames, Life Burst, Flame Shield   moved to globalupdate
         if (spellId == 56092 || spellId == 57143 || spellId == 57108)
         {
             vehcomboPoints = 0;
-            //TC_LOG_ERROR("scripts", "OnSpellHitTarget(): veh cp waster %u", curInfo->Id);
+            //TC_LOG_ERROR("scripts", "OnSpellHitTarget(): veh cp waster {}", curInfo->Id);
         }
     }
 }
@@ -8956,8 +8957,8 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
 
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_BACK), GOSSIP_SENDER_EQUIPMENT, GOSSIP_ACTION_INFO_DEF + 2);
 
-            //TC_LOG_ERROR("entities.player", "OnGossipSelect(bot): added %u item(s) to list of %s (requester: %s)",
-            //    counter, me->GetName().c_str(), player->GetName().c_str());
+            //TC_LOG_ERROR("entities.player", "OnGossipSelect(bot): added {} item(s) to list of {} (requester: {})",
+            //    counter, me->GetName(), player->GetName());
 
             break;
         }
@@ -9304,8 +9305,8 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             Item* item = player->GetItemByGuid(ObjectGuid::Create<HighGuid::Item>(itemGuidLow));
             if (!item)
             {
-                TC_LOG_ERROR("npcbots", "GOSSIP_SENDER_EQUIPMENT_BANK_DEPOSIT_ITEM: item %u not found on player %s! Cheater?",
-                    itemGuidLow, player->GetName().c_str());
+                TC_LOG_ERROR("npcbots", "GOSSIP_SENDER_EQUIPMENT_BANK_DEPOSIT_ITEM: item {} not found on player {}! Cheater?",
+                    itemGuidLow, player->GetName());
                 break;
             }
 
@@ -9401,8 +9402,8 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             Item* item = BotDataMgr::WithdrawBotBankItem(player->GetGUID(), itemGuidLow);
             if (!item)
             {
-                TC_LOG_ERROR("npcbots", "GOSSIP_SENDER_EQUIPMENT_BANK_WITHDRAW_ITEM: item %u not found on player %s! Cheater?",
-                    itemGuidLow, player->GetName().c_str());
+                TC_LOG_ERROR("npcbots", "GOSSIP_SENDER_EQUIPMENT_BANK_WITHDRAW_ITEM: item {} not found on player {}! Cheater?",
+                    itemGuidLow, player->GetName());
                 break;
             }
 
@@ -9701,7 +9702,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 AddGossipItemFor(player, icon, name.str().c_str(), toggleSender, GOSSIP_ACTION_INFO_DEF + *itr);
                 if (++counter >= BOT_GOSSIP_MAX_ITEMS - 1) //back
                 {
-                    TC_LOG_ERROR("scripts", "bot_ai: gossip abilities list overflow with sender %u for bot class %u!",
+                    TC_LOG_ERROR("scripts", "bot_ai: gossip abilities list overflow with sender {} for bot class {}!",
                         sender, uint32(_botclass));
                     break;
                 }
@@ -9757,7 +9758,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 case BOT_CLASS_WARLOCK:         specIndex = BOT_SPEC_WARLOCK_AFFLICTION;    break;
                 case BOT_CLASS_DRUID:           specIndex = BOT_SPEC_DRUID_BALANCE;         break;
                 default:
-                    TC_LOG_ERROR("entities.unit", "bot_ai:GOSSIP_SENDER_SPEC called for class %u with no specs!", uint32(_botclass));
+                    TC_LOG_ERROR("entities.unit", "bot_ai:GOSSIP_SENDER_SPEC called for class {} with no specs!", uint32(_botclass));
                     return true;
             }
 
@@ -9949,7 +9950,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                         case 40: locStringId = BOT_TEXT_HIREFAIL_LVL40; break;
                         case 60: locStringId = BOT_TEXT_HIREFAIL_LVL60; break;
                         default:
-                            TC_LOG_ERROR("scripts", "No message exists for min class level %u!", uint32(minlvl));
+                            TC_LOG_ERROR("scripts", "No message exists for min class level {}!", uint32(minlvl));
                             locStringId = BOT_TEXT_HIREFAIL_LVL60;
                             break;
                     }
@@ -10941,7 +10942,7 @@ void bot_ai::OnOwnerDamagedBy(Unit* attacker)
             byspell = true;
             break;
         default:
-            //TC_LOG_ERROR("entities.player", "minion_ai: OnOwnerDamagedBy() - unknown bot class %u", uint8(_botclass));
+            //TC_LOG_ERROR("entities.player", "minion_ai: OnOwnerDamagedBy() - unknown bot class {}", uint8(_botclass));
             break;
     }
 
@@ -11080,19 +11081,19 @@ bool bot_ai::_canLootItemForPlayer(Player* player, Creature* creature, uint8 slo
     LootItem const* item = creature->loot.LootItemInSlot(slot, player, &qitem, &ffaitem, &conditem);
     if (!item || item->is_looted)
     {
-        //TC_LOG_ERROR("scripts", "can't loot item %u, no item", slot);
+        //TC_LOG_ERROR("scripts", "can't loot item {}, no item", slot);
         return false;
     }
 
     if (!qitem && item->is_blocked)
     {
-        //TC_LOG_ERROR("scripts", "can't loot item %u (%u), blocked", slot, item->itemid);
+        //TC_LOG_ERROR("scripts", "can't loot item {} ({}), blocked", slot, item->itemid);
         return false;
     }
 
     if (!item->rollWinnerGUID.IsEmpty() && item->rollWinnerGUID != player->GetGUID())
     {
-        //TC_LOG_ERROR("scripts", "can't loot item %u (%u), roll won", slot, item->itemid);
+        //TC_LOG_ERROR("scripts", "can't loot item {} ({}), roll won", slot, item->itemid);
         return false;
     }
 
@@ -11100,7 +11101,7 @@ bool bot_ai::_canLootItemForPlayer(Player* player, Creature* creature, uint8 slo
     if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item->itemid, item->count) == EQUIP_ERR_OK)
         return true;
 
-    //TC_LOG_ERROR("scripts", "can't loot item %u (%u), can't store", slot, item->itemid);
+    //TC_LOG_ERROR("scripts", "can't loot item {} ({}), can't store", slot, item->itemid);
     return false;
 }
 bool bot_ai::_canLootCreatureForPlayer(Player* player, Creature* creature, uint32 lootQualityMask, uint32 lootThreshold) const
@@ -11116,32 +11117,32 @@ bool bot_ai::_canLootCreatureForPlayer(Player* player, Creature* creature, uint3
 
         if (i->is_blocked || i->is_looted)
         {
-            //TC_LOG_ERROR("scripts", "item %u is blocked", i->itemid);
+            //TC_LOG_ERROR("scripts", "item {} is blocked", i->itemid);
             continue;
         }
 
         if (!i->rollWinnerGUID.IsEmpty() && i->rollWinnerGUID != player->GetGUID())
         {
-            //TC_LOG_ERROR("scripts", "can't loot item %u (%u), roll won", slot, i->itemid);
+            //TC_LOG_ERROR("scripts", "can't loot item {} ({}), roll won", slot, i->itemid);
             continue;
         }
 
         ItemTemplate const* itemProto = sObjectMgr->GetItemTemplate(i->itemid);
         if (!itemProto)
         {
-            //TC_LOG_ERROR("scripts", "no item proto for itemId %u", i->itemid);
+            //TC_LOG_ERROR("scripts", "no item proto for itemId {}", i->itemid);
             return false;
         }
 
         if (itemProto->Quality >= lootThreshold)
         {
-            //TC_LOG_ERROR("scripts", "item %u group quality threshold mismatch", i->itemid);
+            //TC_LOG_ERROR("scripts", "item {} group quality threshold mismatch", i->itemid);
             continue;
         }
 
         if (!((1 << itemProto->Quality) & lootQualityMask))
         {
-            //TC_LOG_ERROR("scripts", "item %u lootQualityMask mismatch", i->itemid);
+            //TC_LOG_ERROR("scripts", "item {} lootQualityMask mismatch", i->itemid);
             continue;
         }
 
@@ -11163,13 +11164,13 @@ bool bot_ai::_canLootCreatureForPlayer(Player* player, Creature* creature, uint3
                 LootItem* i = &creature->loot.quest_items[qi->index];
                 if (i->is_looted || qi->is_looted)
                 {
-                    //TC_LOG_ERROR("scripts", "item %u is looted", i->itemid);
+                    //TC_LOG_ERROR("scripts", "item {} is looted", i->itemid);
                     continue;
                 }
 
                 if (!i->rollWinnerGUID.IsEmpty() && i->rollWinnerGUID != player->GetGUID())
                 {
-                    //TC_LOG_ERROR("scripts", "can't loot item %u (%u), roll won", slot, i->itemid);
+                    //TC_LOG_ERROR("scripts", "can't loot item {} ({}), roll won", slot, i->itemid);
                     continue;
                 }
 
@@ -11177,13 +11178,13 @@ bool bot_ai::_canLootCreatureForPlayer(Player* player, Creature* creature, uint3
 
                 if (itemProto->Quality >= lootThreshold)
                 {
-                    //TC_LOG_ERROR("scripts", "item %u group quality threshold mismatch", i->itemid);
+                    //TC_LOG_ERROR("scripts", "item {} group quality threshold mismatch", i->itemid);
                     continue;
                 }
 
                 if (!((1 << itemProto->Quality) & lootQualityMask))
                 {
-                    //TC_LOG_ERROR("scripts", "item %u lootQualityMask mismatch", i->itemid);
+                    //TC_LOG_ERROR("scripts", "item {} lootQualityMask mismatch", i->itemid);
                     continue;
                 }
 
@@ -11209,7 +11210,7 @@ bool bot_ai::_canLootCreature(Creature* creature) const
 
     uint32 lootQualityMask = _getLootQualityMask();
     uint32 lootThreshold = _getLootQualityThreshold();
-    //TC_LOG_ERROR("scripts", "lootQualityMask %u, lootThreshold %u", lootQualityMask, lootThreshold);
+    //TC_LOG_ERROR("scripts", "lootQualityMask {}, lootThreshold {}", lootQualityMask, lootThreshold);
     bool canLootQuality = false;
 
     //std::vector<LootItem> const& lootItems = loot->quest_items;
@@ -11218,13 +11219,13 @@ bool bot_ai::_canLootCreature(Creature* creature) const
         ItemTemplate const* itemProto = sObjectMgr->GetItemTemplate(ci->itemid);
         if (!itemProto)
         {
-            //TC_LOG_ERROR("scripts", "no item proto for itemId %u", ci->itemid);
+            //TC_LOG_ERROR("scripts", "no item proto for itemId {}", ci->itemid);
             return false;
         }
 
         if (itemProto->Quality >= lootThreshold)
         {
-            //TC_LOG_ERROR("scripts", "item %u group quality threshold mismatch", i->itemid);
+            //TC_LOG_ERROR("scripts", "item {} group quality threshold mismatch", i->itemid);
             continue;
         }
 
@@ -11241,13 +11242,13 @@ bool bot_ai::_canLootCreature(Creature* creature) const
             ItemTemplate const* itemProto = sObjectMgr->GetItemTemplate(ci->itemid);
             if (!itemProto)
             {
-                //TC_LOG_ERROR("scripts", "no item proto for itemId %u", ci->itemid);
+                //TC_LOG_ERROR("scripts", "no item proto for itemId {}", ci->itemid);
                 return false;
             }
 
             if (itemProto->Quality >= lootThreshold)
             {
-                //TC_LOG_ERROR("scripts", "item %u group quality threshold mismatch", i->itemid);
+                //TC_LOG_ERROR("scripts", "item {} group quality threshold mismatch", i->itemid);
                 continue;
             }
 
@@ -11349,13 +11350,13 @@ void bot_ai::_autoLootCreatureItems(Player* receiver, Creature* creature, uint32
 
         if (i->is_blocked || i->is_looted)
         {
-            //TC_LOG_ERROR("scripts", "item %u is blocked", i->itemid);
+            //TC_LOG_ERROR("scripts", "item {} is blocked", i->itemid);
             continue;
         }
 
         if (!i->rollWinnerGUID.IsEmpty() && i->rollWinnerGUID != receiver->GetGUID())
         {
-            //TC_LOG_ERROR("scripts", "can't loot item %u (%u), roll won", slot, i->itemid);
+            //TC_LOG_ERROR("scripts", "can't loot item {} ({}), roll won", slot, i->itemid);
             continue;
         }
 
@@ -11368,8 +11369,8 @@ void bot_ai::_autoLootCreatureItems(Player* receiver, Creature* creature, uint32
 
         if (_canLootItemForPlayer(receiver, creature, slot - 1) && i->AllowedForPlayer(receiver))
         {
-            //TC_LOG_ERROR("scripts", "looting %s (%u), quality %u, threshold %u",
-            //    itemProto->Name1.c_str(), itemProto->ItemId, itemProto->Quality, lootThreshold);
+            //TC_LOG_ERROR("scripts", "looting {} ({}), quality {}, threshold {}",
+            //    itemProto->Name1, itemProto->ItemId, itemProto->Quality, lootThreshold);
             receiver->StoreLootItem(slot - 1, &creature->loot);
         }
     }
@@ -11384,13 +11385,13 @@ void bot_ai::_autoLootCreatureItems(Player* receiver, Creature* creature, uint32
             LootItem* i = &creature->loot.quest_items[qi->index];
             if (i->is_looted || qi->is_looted)
             {
-                //TC_LOG_ERROR("scripts", "item %u is looted", i->itemid);
+                //TC_LOG_ERROR("scripts", "item {} is looted", i->itemid);
                 continue;
             }
 
             if (!i->rollWinnerGUID.IsEmpty() && i->rollWinnerGUID != receiver->GetGUID())
             {
-                //TC_LOG_ERROR("scripts", "can't loot item %u (%u), roll won", slot, i->itemid);
+                //TC_LOG_ERROR("scripts", "can't loot item {} ({}), roll won", slot, i->itemid);
                 continue;
             }
 
@@ -12271,7 +12272,7 @@ bool bot_ai::_equip(uint8 slot, Item* newItem, ObjectGuid receiver)
     {
         TC_LOG_ERROR("entities.player",
             "minion_ai::_equip(): player %s (%s) is trying to make bot %s (id: %u) equip item: %s (id: %u, %s) which has state ITEM_REMOVED!",
-            master->GetName().c_str(), master->GetGUID().ToString().c_str(), me->GetName().c_str(), me->GetEntry(), proto->Name1.c_str(), proto->ItemId, newItem->GetGUID().ToString().c_str());
+            master->GetName(), master->GetGUID().ToString(), me->GetName(), me->GetEntry(), proto->Name1, proto->ItemId, newItem->GetGUID().ToString());
         return false;
     }
 
@@ -12305,7 +12306,7 @@ bool bot_ai::_equip(uint8 slot, Item* newItem, ObjectGuid receiver)
 
             TC_LOG_ERROR("entities.player",
                 "minion_ai::_equip(): player %s (%s) is trying to make bot %s (id: %u) equip item: %s (id: %u, %s) but either does not have this item or does not own it",
-                master->GetName().c_str(), master->GetGUID().ToString().c_str(), me->GetName().c_str(), me->GetEntry(), proto->Name1.c_str(), proto->ItemId, newItem->GetGUID().ToString().c_str());
+                master->GetName(), master->GetGUID().ToString(), me->GetName(), me->GetEntry(), proto->Name1, proto->ItemId, newItem->GetGUID().ToString());
             return false;
         }
 
@@ -12400,8 +12401,8 @@ bool bot_ai::_resetEquipment(uint8 slot, ObjectGuid receiver)
 {
     if (IsWanderer())
     {
-        TC_LOG_ERROR("scripts", "bot_ai::_resetEquipment() is called for wanderer bot %s (%u), slot %u!",
-            me->GetName().c_str(), me->GetEntry(), uint32(slot));
+        TC_LOG_ERROR("scripts", "bot_ai::_resetEquipment() is called for wanderer bot {} ({}), slot {}!",
+            me->GetName(), me->GetEntry(), uint32(slot));
         return false;
     }
 
@@ -12438,8 +12439,8 @@ bool bot_ai::_resetEquipment(uint8 slot, ObjectGuid receiver)
 
     if (!_equip(slot, stItem, receiver))
     {
-        TC_LOG_ERROR("entities.player", "minion_ai::_resetEquipment(): player %s (%s) failed to reset equipment for bot %s (id: %u) in slot %u",
-            master->GetName().c_str(), master->GetGUID().ToString().c_str(), me->GetName().c_str(), me->GetEntry(), slot);
+        TC_LOG_ERROR("entities.player", "minion_ai::_resetEquipment(): player {} ({}) failed to reset equipment for bot {} (id: {}) in slot {}",
+            master->GetName(), master->GetGUID().ToString(), me->GetName(), me->GetEntry(), slot);
         return false;
     }
     return true;
@@ -12935,8 +12936,8 @@ void bot_ai::ApplyItemSetBonuses(Item* item, bool apply)
             if (!spellInfo)
                 continue;
 
-            //TC_LOG_ERROR("entities.player", "ApplyItemSetBonusesB: %s's %s, %s (%u), %s (%u), icount %u",
-            //    me->GetName().c_str(), apply ? "apply" : "remove", itemSet->name[0], setId, spellInfo->SpellName[0], spellInfo->Id, uint32(setItemCount));
+            //TC_LOG_ERROR("entities.player", "ApplyItemSetBonusesB: {}'s {}, {} ({}), {} ({}), icount {}",
+            //    me->GetName(), apply ? "apply" : "remove", itemSet->name[0], setId, spellInfo->SpellName[0], spellInfo->Id, uint32(setItemCount));
 
             if (apply)
             {
@@ -12993,8 +12994,8 @@ void bot_ai::ApplyItemSetBonuses(Item* item, bool apply)
             if (!spellInfo)
                 continue;
 
-            //TC_LOG_ERROR("entities.player", "ApplyItemSetBonusesB (all): %s's %s, %s (%u), %s (%u), c %u, req %u",
-            //    me->GetName().c_str(), apply ? "apply" : "remove", itemSet->name[0], *itr, spellInfo->SpellName[0], spellInfo->Id, uint32(setItemCount), itemSet->SetThreshold[j]);
+            //TC_LOG_ERROR("entities.player", "ApplyItemSetBonusesB (all): {}'s {}, {} ({}), {} ({}), c {}, req {}",
+            //    me->GetName(), apply ? "apply" : "remove", itemSet->name[0], *itr, spellInfo->SpellName[0], spellInfo->Id, uint32(setItemCount), itemSet->SetThreshold[j]);
 
             if (apply)
             {
@@ -13382,11 +13383,11 @@ float bot_ai::_getItemGearStatScore(ItemTemplate const* iproto, uint8 forslot, I
     if (!proto)
         return 0.0f;
 
-    //TC_LOG_ERROR("scripts", "_getItemGearScore for %u - %s", proto->ItemId, proto->Name1.c_str());
+    //TC_LOG_ERROR("scripts", "_getItemGearScore for {} - {}", proto->ItemId, proto->Name1);
 
     ItemStatBonus istats = {};
     //for (uint8 i = 0; i != MAX_BOT_ITEM_MOD; ++i)
-    //    TC_LOG_ERROR("scripts", "_getItemGearScore at %u %i", uint32(i), istats[i]);
+    //    TC_LOG_ERROR("scripts", "_getItemGearScore at {} {}", uint32(i), istats[i]);
 
     ScalingStatDistributionEntry const* ssd = proto->ScalingStatDistribution ? sScalingStatDistributionStore.LookupEntry(proto->ScalingStatDistribution) : NULL;
 
@@ -13579,7 +13580,7 @@ float bot_ai::_getItemGearStatScore(ItemTemplate const* iproto, uint8 forslot, I
     }
 
     //for (uint8 i = 0; i != MAX_BOT_ITEM_MOD; ++i)
-    //    TC_LOG_ERROR("scripts", "_getItemGearScore total %u %i", uint32(i), istats[i]);
+    //    TC_LOG_ERROR("scripts", "_getItemGearScore total {} {}", uint32(i), istats[i]);
 
     //stats are fetched, not calculate
     float itemScore = 0.0f;
@@ -13590,7 +13591,7 @@ float bot_ai::_getItemGearStatScore(ItemTemplate const* iproto, uint8 forslot, I
     float itemGearScore = CalculateItemGearScore(me->GetEntry(), me->GetLevel(), GetBotClass(), GetSpec(), forslot, iproto);
     itemScore += itemGearScore;
 
-    //TC_LOG_ERROR("scripts", "_getItemGearScore total score %.3f", itemScore);
+    //TC_LOG_ERROR("scripts", "_getItemGearScore total score {}", itemScore);
     return itemScore;
 }
 
@@ -13713,8 +13714,8 @@ uint32 bot_ai::GetEquipDisplayId(uint8 slot) const
                 }
                 else
                 {
-                    TC_LOG_ERROR("scripts", "bot_ai::GetEquipDisplayId(): invalid item Id %i for bot %u %s slot %u",
-                        item_id, me->GetEntry(), me->GetName().c_str(), uint32(slot));
+                    TC_LOG_ERROR("scripts", "bot_ai::GetEquipDisplayId(): invalid item Id {} for bot {} {} slot {}",
+                        item_id, me->GetEntry(), me->GetName(), uint32(slot));
                 }
             }
             else
@@ -14041,7 +14042,7 @@ void bot_ai::ApplyRacials()
                 InitSpellMap(RaceSpellForClass(myrace, _botclass), true, false);
             break;
         default:
-            //TC_LOG_ERROR("entities.player", "bot_ai::ApplyRacePassives(): unknown race %u for bot %s (%u)", uint32(me->GetRace()), me->GetName().c_str(), me->GetEntry());
+            //TC_LOG_ERROR("entities.player", "bot_ai::ApplyRacePassives(): unknown race {} for bot {} ({})", uint32(me->GetRace()), me->GetName(), me->GetEntry());
             return;
     }
 }
@@ -14111,11 +14112,11 @@ void bot_ai::InitSpec()
         spec = npcBotData->spec;
     }
 
-    //TC_LOG_ERROR("entities.unit", "bot_ai::InitSpec(): bot %u class %u spec: %u", me->GetEntry(), uint32(_botclass), uint32(spec));
+    //TC_LOG_ERROR("entities.unit", "bot_ai::InitSpec(): bot {} class {} spec: {}", me->GetEntry(), uint32(_botclass), uint32(spec));
 
     if (spec < BOT_SPEC_BEGIN || spec > BOT_SPEC_END)
     {
-        TC_LOG_ERROR("entities.unit", "bot_ai::InitSpec(): spec (%u) is out of range for bot %u! Falling to default (1)...",
+        TC_LOG_ERROR("entities.unit", "bot_ai::InitSpec(): spec ({}) is out of range for bot {}! Falling to default (1)...",
             uint32(spec), me->GetEntry());
 
         spec = BOT_SPEC_DEFAULT;
@@ -14647,8 +14648,8 @@ void bot_ai::InitEquips()
             {
                 if (i <= BOT_SLOT_RANGED && einfo->ItemEntry[i] != 0)
                 {
-                    TC_LOG_WARN("npcbots", "Wanderer bot %s id %u level %u can't generate req gear in slot %u, generating standard item!",
-                        me->GetName().c_str(), me->GetEntry(), uint32(me->GetLevel()), uint32(i));
+                    TC_LOG_WARN("npcbots", "Wanderer bot {} id {} level {} can't generate req gear in slot {}, generating standard item!",
+                        me->GetName(), me->GetEntry(), uint32(me->GetLevel()), uint32(i));
 
                     item = Item::CreateItem(einfo->ItemEntry[i], 1);
                     ASSERT(item, "Failed to init standard Item for wandering bot!");
@@ -14663,7 +14664,7 @@ void bot_ai::InitEquips()
                 gss << " [" << uint32(i) << "] " << _equips[i]->GetTemplate()->Name1 << " (" << _equips[i]->GetEntry() << ')';
             }
         }
-        TC_LOG_TRACE("npcbots", "%s", gss.str().c_str());
+        TC_LOG_TRACE("npcbots", "{}", gss.str());
     }
     else
     {
@@ -14713,8 +14714,8 @@ void bot_ai::InitEquips()
                 }
                 ASSERT(found);
                 //ItemTemplate const* proto = item->GetTemplate();
-                //TC_LOG_ERROR("entities.player", "minion_ai::InitEquips(): bot %s (id: %u): found item: for slot %u: %s (id: %u, guidLow: %u)",
-                //    me->GetName().c_str(), me->GetEntry(), i, proto->Name1.c_str(), itemId, itemGuidLow);
+                //TC_LOG_ERROR("entities.player", "minion_ai::InitEquips(): bot {} (id: {}): found item: for slot {}: {} (id: {}, guidLow: {})",
+                //    me->GetName(), me->GetEntry(), i, proto->Name1, itemId, itemGuidLow);
 
             } while (iiresult->NextRow());
         }
@@ -14993,7 +14994,7 @@ void bot_ai::_AddItemLink(Player const* forPlayer, Item const* item, std::ostrin
     if (item->GetCount() > 1)
         str << "x" << item->GetCount() << ' ';
 
-    //TC_LOG_ERROR("entities.player", "bot_ai::_AddItemLink(): %s", str.str().c_str());
+    //TC_LOG_ERROR("entities.player", "bot_ai::_AddItemLink(): {}", str.str());
 }
 //Unused
 void bot_ai::_AddQuestLink(Player const* forPlayer, Quest const* quest, std::ostringstream &str) const
@@ -15079,7 +15080,7 @@ void bot_ai::_LocalizeItem(Player const* forPlayer, std::string &itemName, std::
     }
 
     int32 randomPropId = item->GetItemRandomPropertyId();
-    //TC_LOG_ERROR("entities.player", "bot_ai::_LocalizeItem(): randomPropId = %i", randomPropId);
+    //TC_LOG_ERROR("entities.player", "bot_ai::_LocalizeItem(): randomPropId = {}", randomPropId);
     if (!randomPropId)
         return;
 
@@ -15091,7 +15092,7 @@ void bot_ai::_LocalizeItem(Player const* forPlayer, std::string &itemName, std::
             //if (suffs)
             {
                 //for (uint8 i = 0; i != MAX_LOCALES; ++i)
-                //    TC_LOG_ERROR("entities.player", "bot_ai::_LocalizeItem(): rand prop suffix for loc %u = %s", i, suffs[i]);
+                //    TC_LOG_ERROR("entities.player", "bot_ai::_LocalizeItem(): rand prop suffix for loc {} = {}", i, suffs[i]);
                 suffix = suffs[loc];
             }
         }
@@ -15104,7 +15105,7 @@ void bot_ai::_LocalizeItem(Player const* forPlayer, std::string &itemName, std::
             //if (suffs)
             {
                 //for (uint8 i = 0; i != MAX_LOCALES; ++i)
-                //    TC_LOG_ERROR("entities.player", "bot_ai::_LocalizeItem(): rand suff suffix for loc %u = %s", i, suffs[i]);
+                //    TC_LOG_ERROR("entities.player", "bot_ai::_LocalizeItem(): rand suff suffix for loc {} = {}", i, suffs[i]);
                 suffix = suffs[loc];
             }
         }
@@ -15335,8 +15336,8 @@ void bot_ai::JustDied(Unit* u)
 
     if (IsTempBot())
     {
-        //TC_LOG_ERROR("entities.player", "Unsummoning temp bot %s (%s), owner: %s (%s)...",
-        //    me->GetName().c_str(), me->GetGUID().ToString().c_str(), master->GetName().c_str(), master->GetGUID().ToString().c_str());
+        //TC_LOG_ERROR("entities.player", "Unsummoning temp bot {} ({}), owner: {} ({})...",
+        //    me->GetName(), me->GetGUID().ToString(), master->GetName(), master->GetGUID().ToString());
 
         if (!IAmFree())
             master->GetBotMgr()->RemoveBot(me->GetGUID(), BOT_REMOVE_UNSUMMON);
@@ -15365,11 +15366,11 @@ void bot_ai::JustDied(Unit* u)
     }
     else if (u && (u->IsPvP() || u->IsControlledByPlayer() || u->IsNPCBotOrPet()))
     {
-        TC_LOG_DEBUG("npcbots", "%s %s id %u class %u level %u WAS KILLED BY %s %s id %u class %u level %u on their way to %s!",
-            IsWanderer() ? "Wandering bot" : "Bot", me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()),
+        TC_LOG_DEBUG("npcbots", "{} {} id {} class {} level {} WAS KILLED BY {} {} id {} class {} level {} on their way to {}!",
+            IsWanderer() ? "Wandering bot" : "Bot", me->GetName(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()),
             (u->IsPlayer() ? "player" : u->IsNPCBot() ? u->ToCreature()->GetBotAI()->IsWanderer() ? "wandering bot" : "bot" : u->IsNPCBotPet() ? "botpet" : "creature"),
-            u->GetName().c_str(), u->GetEntry(), uint32(u->GetClass()), uint32(u->GetLevel()),
-            IsWanderer() ? _travel_node_cur->GetName().c_str() : "''");
+            u->GetName(), u->GetEntry(), uint32(u->GetClass()), uint32(u->GetLevel()),
+            IsWanderer() ? _travel_node_cur->GetName() : "''");
     }
 
     _reviveTimer = (IsWanderer() && !(u && u->IsControlledByPlayer())) ? REVIVE_TIMER_MEDIUM :
@@ -15392,18 +15393,18 @@ void bot_ai::KilledUnit(Unit* u)
         {
             if (IsWanderer())
             {
-                TC_LOG_DEBUG("npcbots", "Wandering bot %s id %u class %u level %u KILLED %s %s id %u class %u level %u on their way to %s!",
-                    me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()),
+                TC_LOG_DEBUG("npcbots", "Wandering bot {} id {} class {} level {} KILLED {} {} id {} class {} level {} on their way to {}!",
+                    me->GetName(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()),
                     (u->IsPlayer() ? "player" : u->IsNPCBot() ? u->ToCreature()->GetBotAI()->IsWanderer() ? "wandering bot" : "bot" : u->IsNPCBotPet() ? "botpet" : "creature"),
-                    u->GetName().c_str(), u->GetEntry(), uint32(u->GetClass()), uint32(u->GetLevel()),
-                    _travel_node_cur->GetName().c_str());
+                    u->GetName(), u->GetEntry(), uint32(u->GetClass()), uint32(u->GetLevel()),
+                    _travel_node_cur->GetName());
             }
             else if (u->IsNPCBot() && u->ToCreature()->GetBotAI()->IsWanderer())
             {
-                TC_LOG_DEBUG("npcbots", "Bot %s id %u class %u level %u KILLED wandering bot %s id %u class %u level %u on their way to %s!",
-                    me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()),
-                    u->GetName().c_str(), u->GetEntry(), uint32(u->GetClass()), uint32(u->GetLevel()),
-                    IsWanderer() ? _travel_node_cur->GetName().c_str() : "''");
+                TC_LOG_DEBUG("npcbots", "Bot {} id {} class {} level {} KILLED wandering bot {} id {} class {} level {} on their way to {}!",
+                    me->GetName(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()),
+                    u->GetName(), u->GetEntry(), uint32(u->GetClass()), uint32(u->GetLevel()),
+                    IsWanderer() ? _travel_node_cur->GetName() : "''");
             }
         }
     }
@@ -15532,8 +15533,8 @@ void bot_ai::OnBotSpellGo(Spell const* spell, bool ok)
         _orders.front().params.spellCastParams.baseSpell == curInfo->GetFirstRankSpell()->Id)
     {
         if (DEBUG_BOT_ORDERS)
-            TC_LOG_ERROR("entities.player", "doCast(): ordered spell %u by %s was %s!",
-                curInfo->Id, me->GetName().c_str(), ok ? "successful" : "unsuccessful");
+            TC_LOG_ERROR("entities.player", "doCast(): ordered spell {} by {} was {}!",
+                curInfo->Id, me->GetName(), ok ? "successful" : "unsuccessful");
         CompleteOrder(_orders.front());
     }
 }
@@ -15548,7 +15549,7 @@ void bot_ai::OnBotOwnerSpellGo(Spell const* spell, bool ok)
     if (spellInfo->IsPassive())
         return;
 
-    //TC_LOG_ERROR("entities.player", "OnBotOwnerSpellGo(): %u by %s", spellInfo->Id, master->GetName().c_str());
+    //TC_LOG_ERROR("entities.player", "OnBotOwnerSpellGo(): {} by {}", spellInfo->Id, master->GetName());
 
     if (spell->m_targets.HasDst() && HasBotAwaitState(BOT_AWAIT_SEND) && (me->GetTransport() == master->GetTransport()))
     {
@@ -15631,12 +15632,12 @@ void bot_ai::OnBotSpellInterrupted(SpellSchoolMask schoolMask, uint32 unTimeMs)
             _orders.front().params.spellCastParams.baseSpell == itr->first)
         {
             if (DEBUG_BOT_ORDERS)
-                TC_LOG_ERROR("entities.player", "doCast(): ordered spell %u was interrupted!", info->Id);
+                TC_LOG_ERROR("entities.player", "doCast(): ordered spell {} was interrupted!", info->Id);
             CompleteOrder(_orders.front());
         }
 
         itr->second->cooldown += unTimeMs;
-        //TC_LOG_ERROR("entities.player", "OnBotSpellInterrupted(): Adding cooldown (%u, new: %u) to spell %s (id: %u, schoolmask: %u), reqSchoolMask = %u",
+        //TC_LOG_ERROR("entities.player", "OnBotSpellInterrupted(): Adding cooldown ({}, new: {}) to spell {} (id: {}, schoolmask: {}), reqSchoolMask = {}",
         //    unTimeMs, itr->second.second, info->SpellName[0], info->Id, info->SchoolMask, schoolMask);
     }
 
@@ -15712,7 +15713,7 @@ void bot_ai::CastBotItemCombatSpell(DamageInfo const& damageInfo, Item* item, It
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellData.SpellId);
             if (!spellInfo)
             {
-                //TC_LOG_ERROR("entities.player.items", "WORLD: unknown Item spellid %i", spellData.SpellId);
+                //TC_LOG_ERROR("entities.player.items", "WORLD: unknown Item spellid {}", spellData.SpellId);
                 continue;
             }
 
@@ -15814,7 +15815,7 @@ bool bot_ai::AddOrder(BotOrder&& order)
 {
     if (_orders.size() >= MAX_BOT_ORDERS_QUEUE_SIZE)
     {
-        TC_LOG_ERROR("scripts", "bot_ai::AddOrder: orders limit reached for %s (%u)!", me->GetName().c_str(), uint32(_orders.size()));
+        TC_LOG_ERROR("scripts", "bot_ai::AddOrder: orders limit reached for {} ({})!", me->GetName(), uint32(_orders.size()));
         return false;
     }
 
@@ -15825,14 +15826,14 @@ void bot_ai::CancelOrder(BotOrder const& order)
 {
     if (_orders.empty())
     {
-        TC_LOG_ERROR("scripts", "bot_ai::CancelOrder: %s orders are empty while trying to remove order type %u!",
-            me->GetName().c_str(), uint32(order._type));
+        TC_LOG_ERROR("scripts", "bot_ai::CancelOrder: {} orders are empty while trying to remove order type {}!",
+            me->GetName(), uint32(order._type));
         return;
     }
     if (_orders.front()._type != order._type)
     {
-        TC_LOG_ERROR("scripts", "bot_ai::CancelOrder: %s front order (type %u) is different from cur order (type %u)!",
-            me->GetName().c_str(), uint32(_orders.front()._type), uint32(order._type));
+        TC_LOG_ERROR("scripts", "bot_ai::CancelOrder: {} front order (type {}) is different from cur order (type {})!",
+            me->GetName(), uint32(_orders.front()._type), uint32(order._type));
         return;
     }
 
@@ -15843,14 +15844,14 @@ void bot_ai::CompleteOrder(BotOrder const& order)
 {
     if (_orders.empty())
     {
-        TC_LOG_ERROR("scripts", "bot_ai::CompleteOrder: %s orders are empty while trying to remove order type %u!",
-            me->GetName().c_str(), uint32(order._type));
+        TC_LOG_ERROR("scripts", "bot_ai::CompleteOrder: {} orders are empty while trying to remove order type {}!",
+            me->GetName(), uint32(order._type));
         return;
     }
     if (_orders.front()._type != order._type)
     {
-        TC_LOG_ERROR("scripts", "bot_ai::CompleteOrder: %s front order (type %u) is different from cur order (type %u)!",
-            me->GetName().c_str(), uint32(_orders.front()._type), uint32(order._type));
+        TC_LOG_ERROR("scripts", "bot_ai::CompleteOrder: {} front order (type {}) is different from cur order (type {})!",
+            me->GetName(), uint32(_orders.front()._type), uint32(order._type));
         return;
     }
 
@@ -15920,7 +15921,7 @@ void bot_ai::_ProcessOrders()
             break;
         }
         default:
-            TC_LOG_ERROR("scripts", "bot_ai:_ProcessOrders: invalid order type %u!", uint32(order._type));
+            TC_LOG_ERROR("scripts", "bot_ai:_ProcessOrders: invalid order type {}!", uint32(order._type));
             CancelOrder(order);
             return;
     }
@@ -15939,7 +15940,7 @@ bool bot_ai::IsLastOrder(BotOrderTypes order_type, uint32 param1) const
                         return true;
                     break;
                 default:
-                    TC_LOG_ERROR("scripts", "bot_ai:IsLastOrder: invalid order type %u!", uint32(order_type));
+                    TC_LOG_ERROR("scripts", "bot_ai:IsLastOrder: invalid order type {}!", uint32(order_type));
                     break;
             }
         }
@@ -16121,12 +16122,12 @@ void bot_ai::DoSkytalonVehicleStrats(uint32 diff)
 
     if (!drakespell)
     {
-        TC_LOG_ERROR("scripts", "DoSkytalonVehicleStrats no spell for role mask %u cp %u, power %u, target %s",
-            GetBotRoles(), uint32(vehcomboPoints), drakePower, target->GetName().c_str());
+        TC_LOG_ERROR("scripts", "DoSkytalonVehicleStrats no spell for role mask {} cp {}, power {}, target {}",
+            GetBotRoles(), uint32(vehcomboPoints), drakePower, target->GetName());
         return;
     }
 
-    //TC_LOG_ERROR("scripts", "DoSkytalonVehicleStrats %u on %s", drakespell, target->GetName().c_str());
+    //TC_LOG_ERROR("scripts", "DoSkytalonVehicleStrats {} on {}", drakespell, target->GetName());
 
     SetBotCommandState(BOT_COMMAND_ATTACK);
     drake->BotStopMovement();
@@ -16189,7 +16190,7 @@ void bot_ai::DoRubyDrakeVehicleStrats(uint32 diff)
 
     if (!drakespell)
     {
-        TC_LOG_ERROR("scripts", "DoRubyDrakeVehicleStrats no spell for target %s", target->GetName().c_str());
+        TC_LOG_ERROR("scripts", "DoRubyDrakeVehicleStrats no spell for target {}", target->GetName());
         return;
     }
 
@@ -16349,7 +16350,7 @@ void bot_ai::DoEmeraldDrakeVehicleStrats(uint32 diff)
 
     if (!drakespell)
     {
-        TC_LOG_ERROR("scripts", "DoEmeraldDrakeVehicleStrats no spell for target %s", target->GetName().c_str());
+        TC_LOG_ERROR("scripts", "DoEmeraldDrakeVehicleStrats no spell for target {}", target->GetName());
         return;
     }
 
@@ -16448,7 +16449,7 @@ void bot_ai::DoAmberDrakeVehicleStrats(uint32 diff)
 
     if (!drakespell)
     {
-        TC_LOG_ERROR("scripts", "DoAmberDrakeVehicleStrats no spell for target %s", target->GetName().c_str());
+        TC_LOG_ERROR("scripts", "DoAmberDrakeVehicleStrats no spell for target {}", target->GetName());
         return;
     }
 
@@ -16524,7 +16525,7 @@ void bot_ai::DoArgentMountVehicleStrats(uint32 diff)
 
     if (!mountspell)
     {
-        TC_LOG_ERROR("scripts", "DoArgentMountVehicleStrats no spell for target %s", target->GetName().c_str());
+        TC_LOG_ERROR("scripts", "DoArgentMountVehicleStrats no spell for target {}", target->GetName());
         return;
     }
 
@@ -16577,7 +16578,7 @@ void bot_ai::DoVehicleStrats(BotVehicleStrats strat, uint32 diff)
 {
     if (curVehStrat != strat)
     {
-        //TC_LOG_ERROR("scripts", "DoVehicleStrats doing strat %u", uint32(strat));
+        //TC_LOG_ERROR("scripts", "DoVehicleStrats doing strat {}", uint32(strat));
         curVehStrat = strat;
     }
 
@@ -16617,7 +16618,7 @@ void bot_ai::DoVehicleStrats(BotVehicleStrats strat, uint32 diff)
             DoGenericVehicleStrats(diff);
             break;
         default:
-            TC_LOG_ERROR("scripts", "Unhandled vehicle strat %u", uint32(strat));
+            TC_LOG_ERROR("scripts", "Unhandled vehicle strat {}", uint32(strat));
             break;
     }
 }
@@ -16675,8 +16676,8 @@ void bot_ai::DoVehicleActions(uint32 diff)
         default:
             strat = BOT_VEH_STRAT_GENERIC;
             if (curVehStrat != strat)
-                TC_LOG_DEBUG("scripts", "bot_ai DoVehicleActions: %s has to use generic strat for vehicle creature %s (%u)",
-                me->GetName().c_str(), me->GetVehicleBase()->GetName().c_str(), me->GetVehicleBase()->GetEntry());
+                TC_LOG_DEBUG("scripts", "bot_ai DoVehicleActions: {} has to use generic strat for vehicle creature {} ({})",
+                me->GetName(), me->GetVehicleBase()->GetName(), me->GetVehicleBase()->GetEntry());
             break;
     }
 
@@ -16898,8 +16899,8 @@ bool bot_ai::GlobalUpdate(uint32 diff)
     if (!me->IsInWorld())
     {
         if (IAmFree())
-            TC_LOG_ERROR("scripts", "bot_ai::GlobalUpdate is called for free bot not in world: %s (%u) class %u level %u",
-                me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()));
+            TC_LOG_ERROR("scripts", "bot_ai::GlobalUpdate is called for free bot not in world: {} ({}) class {} level {}",
+                me->GetName(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()));
         return false;
     }
 
@@ -17180,13 +17181,13 @@ bool bot_ai::GlobalUpdate(uint32 diff)
             master->GetLootGUID().IsEmpty() && !me->isMoving() && !master->isMoving() && master->IsStandState() && !Feasting() && !IsCasting() && !IsCasting(master) &&
             !HasBotCommandState(BOT_COMMAND_MASK_UNMOVING) && !me->GetVehicle())
         {
-            //TC_LOG_ERROR("spells", "bot_ai:UpdateEx by %s, found free master, my skills: %u:", me->GetName().c_str(), uint32(_roleMask & BOT_ROLE_MASK_GATHERING));
+            //TC_LOG_ERROR("spells", "bot_ai:UpdateEx by {}, found free master, my skills: {}:", me->GetName(), uint32(_roleMask & BOT_ROLE_MASK_GATHERING));
             std::list<WorldObject*> woList;
             NearbyObjectBySkillCheck check(master, INTERACTION_DISTANCE - 1.0f, (_roleMask & BOT_ROLE_MASK_GATHERING));
             Trinity::WorldObjectListSearcher<NearbyObjectBySkillCheck> searcher(me, woList, check, GRID_MAP_TYPE_MASK_CREATURE|GRID_MAP_TYPE_MASK_GAMEOBJECT);
             Cell::VisitAllObjects(me, searcher, 20.f);
             //me->VisitNearbyObject(20.f, searcher);
-            //TC_LOG_ERROR("spells", "bot_ai:UpdateEx: list is %s", woList.empty() ? "empty" : "not empty");
+            //TC_LOG_ERROR("spells", "bot_ai:UpdateEx: list is {}", woList.empty() ? "empty" : "not empty");
             if (!woList.empty())
             {
                 WorldObject* wo = nullptr;
@@ -17202,7 +17203,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
                 }
 
                 wo = wo ? wo : Trinity::Containers::SelectRandomContainerElement(woList);
-                //TC_LOG_ERROR("spells", "bot_ai:UpdateEx: processing %s", wo->GetName().c_str());
+                //TC_LOG_ERROR("spells", "bot_ai:UpdateEx: processing {}", wo->GetName());
                 if (me->GetDistance(wo) <= INTERACTION_DISTANCE * 0.5f && me->HasInArc(float(M_PI), wo))
                 {
                     //cosmetic
@@ -17256,7 +17257,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
             !me->GetVictim() && !master->IsMounted() && !CCed(me) && !Feasting() && !IsCasting() &&
             !HasBotCommandState(BOT_COMMAND_MASK_UNMOVING))
         {
-            //TC_LOG_ERROR("scripts", "bot_ai Looting by %s, my mask: %u:", me->GetName().c_str(), uint32(_roleMask & BOT_ROLE_MASK_LOOTING));
+            //TC_LOG_ERROR("scripts", "bot_ai Looting by {}, my mask: {}:", me->GetName(), uint32(_roleMask & BOT_ROLE_MASK_LOOTING));
             std::list<Unit*> crList;
             NearbyLootableCreatureCheck check(master, std::min(30.f, std::max(5.f, sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE) - 10.f)));
             Trinity::UnitListSearcher<NearbyLootableCreatureCheck> searcher(me, crList, check);
@@ -17266,7 +17267,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
             {
                 if (!_canLootCreature((*itr)->ToCreature()))
                 {
-                    //TC_LOG_ERROR("scripts", "bot_ai Looting: cannot loot %s (%u)", (*itr)->GetName().c_str(), (*itr)->GetGUIDLow());
+                    //TC_LOG_ERROR("scripts", "bot_ai Looting: cannot loot {} ({})", (*itr)->GetName(), (*itr)->GetGUIDLow());
                     crList.erase(itr++);
                     continue;
                 }
@@ -17287,16 +17288,16 @@ bool bot_ai::GlobalUpdate(uint32 diff)
 
                 if (crList.size() > 1)
                     _updateTimerEx1 = urand(400, 600);
-                /*//TC_LOG_ERROR("scripts", "bot_ai Looting: processing %s", un->GetName().c_str());
+                /*//TC_LOG_ERROR("scripts", "bot_ai Looting: processing {}", un->GetName());
                 if (me->GetDistance(un) < INTERACTION_DISTANCE + 2.f)
                 {
-                    //TC_LOG_ERROR("scripts", "bot_ai Looting: looting %s", un->GetName().c_str());
+                    //TC_LOG_ERROR("scripts", "bot_ai Looting: looting {}", un->GetName());
                     _autoLootCreature(un->ToCreature());
                     _updateTimerEx1 = urand(500, 1000);
                 }
                 else
                 {
-                    //TC_LOG_ERROR("scripts", "bot_ai Looting: moving towards %s", un->GetName().c_str());
+                    //TC_LOG_ERROR("scripts", "bot_ai Looting: moving towards {}", un->GetName());
                     Position pos;
                     un->GetNearPoint(me, pos.m_positionX, pos.m_positionY, pos.m_positionZ, 0.f, CONTACT_DISTANCE, un->GetAbsoluteAngle(me));
                     me->GetMotionMaster()->MovePoint(me->GetMapId(), pos, false);
@@ -17333,7 +17334,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         //group demand
         if (!IAmFree() && HasRole(BOT_ROLE_PARTY) && (!master->GetGroup() || !master->GetGroup()->IsMember(me->GetGUID())))
         {
-            //TC_LOG_ERROR("entities.player", "CheckAuras(): adding %s to group", me->GetName().c_str());
+            //TC_LOG_ERROR("entities.player", "CheckAuras(): adding {} to group", me->GetName());
             master->GetBotMgr()->AddBotToGroup(me);
         }
 
@@ -17348,7 +17349,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
                 if (IAmFree())
                     CalculateAoeSpots(me, _aoeSpots);
 
-                //TC_LOG_ERROR("scripts", "GetInPos prepare by %s", me->GetName().c_str());
+                //TC_LOG_ERROR("scripts", "GetInPos prepare by {}", me->GetName());
                 if (!IAmFree() && master->GetBotMgr()->GetBotAttackRangeMode() == BOT_ATTACK_RANGE_EXACT &&
                     master->GetBotMgr()->GetBotExactAttackRange() == 0 && !GetVehicleAttackDistanceOverride() &&
                     !(!IAmFree() && !GetAoeSpots().empty()))
@@ -17363,13 +17364,13 @@ bool bot_ai::GlobalUpdate(uint32 diff)
                 }
                 else
                 {
-                    //TC_LOG_ERROR("scripts", "%s calculates attack pos to attack %s", me->GetName().c_str(), victim->GetName().c_str());
+                    //TC_LOG_ERROR("scripts", "{} calculates attack pos to attack {}", me->GetName(), victim->GetName());
                     bool force = false;
                     CalculateAttackPos(victim, attackpos, force);
                     if (mover->GetExactDist2d(&attackpos) > (force ? 0.1f : 4.f) || (force && IsWanderer()))
                     {
-                        //TC_LOG_ERROR("scripts", "%s moving to x %.2f y %.2f z %.2f to attack %s",
-                        //    me->GetName().c_str(), attackpos.m_positionX, attackpos.m_positionY, attackpos.m_positionZ, victim->GetName().c_str());
+                        //TC_LOG_ERROR("scripts", "{} moving to x {} y {} z {} to attack {}",
+                        //    me->GetName(), attackpos.m_positionX, attackpos.m_positionY, attackpos.m_positionZ, victim->GetName());
                         GetInPosition(true, victim, &attackpos);
                     }
                 }
@@ -17572,8 +17573,8 @@ void bot_ai::UpdateReviveTimer(uint32 diff)
                     WanderNode const* nextNode = GetNextTravelNode(&safePos, true);
                     if (!nextNode)
                     {
-                        TC_LOG_FATAL("scripts", "Bot %s (%u) is unable to get next travel node (1)! cur %u, last %u, position: %s. BOT WAS DISABLED",
-                            me->GetName().c_str(), me->GetEntry(), _travel_node_cur->GetWPId(), _travel_node_last ? _travel_node_last->GetWPId() : 0, me->GetPosition().ToString().c_str());
+                        TC_LOG_FATAL("scripts", "Bot {} ({}) is unable to get next travel node (1)! cur {}, last {}, position: {}. BOT WAS DISABLED",
+                            me->GetName(), me->GetEntry(), _travel_node_cur->GetWPId(), _travel_node_last ? _travel_node_last->GetWPId() : 0, me->GetPosition().ToString());
                         canUpdate = false;
                         return;
                     }
@@ -17582,9 +17583,9 @@ void bot_ai::UpdateReviveTimer(uint32 diff)
                     if (me->GetMap()->GetEntry()->IsContinent())
                         BotMgr::TeleportBot(me, sMapMgr->CreateBaseMap(nextNode->GetMapId()), nextNode, true);
 
-                    TC_LOG_TRACE("npcbots", "Bot %s id %u class %u level %u died on the way from node %u to %u ('%s'), NEW %u ('%s'), %s, dist %.1f yd!",
-                        me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()), _travel_node_last ? _travel_node_last->GetWPId() : 0, _travel_node_cur->GetWPId(),
-                        _travel_node_cur->GetName().c_str(), nextNode->GetWPId(), nextNode->GetName().c_str(), homepos.ToString().c_str(), safePos.GetExactDist(homepos));
+                    TC_LOG_TRACE("npcbots", "Bot {} id {} class {} level {} died on the way from node {} to {} ('{}'), NEW {} ('{}'), {}, dist {} yd!",
+                        me->GetName(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()), _travel_node_last ? _travel_node_last->GetWPId() : 0, _travel_node_cur->GetWPId(),
+                        _travel_node_cur->GetName(), nextNode->GetWPId(), nextNode->GetName(), homepos.ToString(), safePos.GetExactDist(homepos));
 
                     _travel_node_last = _travel_node_cur;
                     _travel_node_cur = nextNode;
@@ -17644,9 +17645,9 @@ void bot_ai::Evade()
         if (mapid != me->GetMap()->GetId() || _evadeCount >= 50 || me->GetExactDist2d(pos) > MAX_WANDER_NODE_DISTANCE ||
             me->GetPositionZ() <= INVALID_HEIGHT || (me->GetExactDist2d(pos) < 20.0f && me->GetExactDist(pos) > 100.0f))
         {
-            TC_LOG_DEBUG("npcbots", "Bot %s id %u class %u level %u map %u TELEPORTING to node %u ('%s') map %u, %s, dist %.1f yd!",
-                me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()), me->GetMapId(), _travel_node_cur->GetWPId(),
-                _travel_node_cur->GetName().c_str(), uint32(mapid), pos.ToString().c_str(), me->GetExactDist(pos));
+            TC_LOG_DEBUG("npcbots", "Bot {} id {} class {} level {} map {} TELEPORTING to node {} ('{}') map {}, {}, dist {} yd!",
+                me->GetName(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()), me->GetMapId(), _travel_node_cur->GetWPId(),
+                _travel_node_cur->GetName(), uint32(mapid), pos.ToString(), me->GetExactDist(pos));
 
             evadeDelayTimer = 12000;
             me->CastSpell(me, WANDERER_HEARTHSTONE);
@@ -17695,9 +17696,9 @@ void bot_ai::Evade()
                 GetNextEvadeMovePoint(pos, use_path);
                 if (pos.m_positionZ <= INVALID_HEIGHT)
                 {
-                    TC_LOG_ERROR("npcbots", "Bot %u '%s' class %u level %u evade move point has invalid height %f (usepath: %u)!\nWPs: cur %u, last %u\nPositions:\ncurrent: %s\ntarget: %s",
-                        me->GetEntry(), me->GetName().c_str(), uint32(_botclass), uint32(me->GetLevel()), pos.m_positionZ, uint32(use_path),
-                        _travel_node_cur->GetWPId(), _travel_node_last ? _travel_node_last->GetWPId() : 0, me->GetPosition().ToString().c_str(), pos.ToString().c_str());
+                    TC_LOG_ERROR("npcbots", "Bot {} '{}' class {} level {} evade move point has invalid height {} (usepath: {})!\nWPs: cur {}, last {}\nPositions:\ncurrent: {}\ntarget: {}",
+                        me->GetEntry(), me->GetName(), uint32(_botclass), uint32(me->GetLevel()), pos.m_positionZ, uint32(use_path),
+                        _travel_node_cur->GetWPId(), _travel_node_last ? _travel_node_last->GetWPId() : 0, me->GetPosition().ToString(), pos.ToString());
                     _evadeCount = 100;
                     return;
                 }
@@ -17716,8 +17717,8 @@ void bot_ai::Evade()
                 WanderNode const* nextNode = GetNextTravelNode(&pos, false);
                 if (!nextNode)
                 {
-                    TC_LOG_FATAL("npcbots", "Bot %s (%u) is unable to get next travel node! cur %u, last %u, position: %s. BOT WAS DISABLED",
-                        me->GetName().c_str(), me->GetEntry(), _travel_node_cur->GetWPId(), _travel_node_last ? _travel_node_last->GetWPId() : 0, me->GetPosition().ToString().c_str());
+                    TC_LOG_FATAL("npcbots", "Bot {} ({}) is unable to get next travel node! cur {}, last {}, position: {}. BOT WAS DISABLED",
+                        me->GetName(), me->GetEntry(), _travel_node_cur->GetWPId(), _travel_node_last ? _travel_node_last->GetWPId() : 0, me->GetPosition().ToString());
                     canUpdate = false;
                     return;
                 }
@@ -17732,9 +17733,9 @@ void bot_ai::Evade()
                 else
                     homepos.Relocate(nextNode);
 
-                TC_LOG_TRACE("npcbots", "Bot %s id %u class %u level %u wandered from node %u to %u, next %u ('%s'), %s, dist %.1f yd!",
-                    me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()), _travel_node_last ? _travel_node_last->GetWPId() : 0, _travel_node_cur->GetWPId(),
-                    nextNode->GetWPId(), nextNode->GetName().c_str(), homepos.ToString().c_str(), pos.GetExactDist(homepos));
+                TC_LOG_TRACE("npcbots", "Bot {} id {} class {} level {} wandered from node {} to {}, next {} ('{}'), {}, dist {} yd!",
+                    me->GetName(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()), _travel_node_last ? _travel_node_last->GetWPId() : 0, _travel_node_cur->GetWPId(),
+                    nextNode->GetWPId(), nextNode->GetName(), homepos.ToString(), pos.GetExactDist(homepos));
 
                 if (me->GetMap()->GetEntry()->IsContinent())
                     evadeDelayTimer = urand(3000, 7000);
@@ -17811,7 +17812,7 @@ void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& use_path) const
         return;
 
     if (me->IsInWater())
-        TC_LOG_TRACE("npcbots", "Bot %s id %u class %u level %u is pathing from water!", me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()));
+        TC_LOG_TRACE("npcbots", "Bot {} id {} class {} level {} is pathing from water!", me->GetName(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()));
 
     switch (path.GetPathType())
     {
@@ -17834,9 +17835,9 @@ void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& use_path) const
                 return;
             }
             //log error and use direct point movement
-            TC_LOG_DEBUG("npcbots", "Bot %s id %u class %u level %u can't find full path to node %u (res %u) from pos %s, falling back to default PF!",
-                me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()), IsWanderer() ? _travel_node_cur->GetWPId() : 0, uint32(path.GetPathType()),
-                me->GetPosition().ToString().c_str());
+            TC_LOG_DEBUG("npcbots", "Bot {} id {} class {} level {} can't find full path to node {} (res {}) from pos {}, falling back to default PF!",
+                me->GetName(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()), IsWanderer() ? _travel_node_cur->GetWPId() : 0, uint32(path.GetPathType()),
+                me->GetPosition().ToString());
             break;
         default:
             break;
@@ -18338,8 +18339,8 @@ WanderNode const* bot_ai::GetNextBGTravelNode() const
                             }
                             if (attackers_count <= 1)
                             {
-                                TC_LOG_DEBUG("npcbots", "Bot %s %u team %u goes for a mine! Cur node: %u %s",
-                                    me->GetName().c_str(), me->GetEntry(), uint32(myTeamId), curNode->GetWPId(), curNode->GetName().c_str());
+                                TC_LOG_DEBUG("npcbots", "Bot {} {} team {} goes for a mine! Cur node: {} {}",
+                                    me->GetName(), me->GetEntry(), uint32(myTeamId), curNode->GetWPId(), curNode->GetName());
                                 return mlinks.size() == 1u ? mlinks.front() : Trinity::Containers::SelectRandomContainerElement(mlinks);
                             }
                         }
@@ -18385,8 +18386,8 @@ WanderNode const* bot_ai::GetNextBGTravelNode() const
 
             if (links.size() > 1)
             {
-                TC_LOG_DEBUG("npcbots", "Bot %s %u team %u has no target point in BG_AV! Falling back to random (%u links)!. Cur node: %u %s",
-                    me->GetName().c_str(), me->GetEntry(), uint32(myTeamId), uint32(curNode->GetLinks().size()), curNode->GetWPId(), curNode->GetName().c_str());
+                TC_LOG_DEBUG("npcbots", "Bot {} {} team {} has no target point in BG_AV! Falling back to random ({} links)!. Cur node: {} {}",
+                    me->GetName(), me->GetEntry(), uint32(myTeamId), uint32(curNode->GetLinks().size()), curNode->GetWPId(), curNode->GetName());
             }
 
             break;
@@ -18469,7 +18470,7 @@ void bot_ai::OnWanderNodeReached()
                     if (already_used)
                         break;
 
-                    //TC_LOG_ERROR("npcbots", "OnWanderNodeReached: [AV] Bot %s USES flag %s at node %u", me->GetName().c_str(), obj->GetName().c_str(), node);
+                    //TC_LOG_ERROR("npcbots", "OnWanderNodeReached: [AV] Bot {} USES flag {} at node {}", me->GetName(), obj->GetName(), node);
 
                     if (me->IsMounted())
                         DismountBot();
@@ -18483,7 +18484,7 @@ void bot_ai::OnWanderNodeReached()
                     {
                         if (GameObject* go = bg->GetBGObject(BG_WS_OBJECT_H_FLAG, true))
                         {
-                            //TC_LOG_ERROR("npcbots", "OnWanderNodeReached: [WSG] Horde flag dist: %f", me->GetExactDist(go));
+                            //TC_LOG_ERROR("npcbots", "OnWanderNodeReached: [WSG] Horde flag dist: {}", me->GetExactDist(go));
                             if (me->IsMounted())
                                 DismountBot();
                             bg->EventBotClickedOnFlag(me, go);
@@ -18493,7 +18494,7 @@ void bot_ai::OnWanderNodeReached()
                     {
                         if (GameObject* go = bg->GetBGObject(BG_WS_OBJECT_A_FLAG, true))
                         {
-                            //TC_LOG_ERROR("npcbots", "OnWanderNodeReached: [WSG] Alliance flag dist: %f", me->GetExactDist(go));
+                            //TC_LOG_ERROR("npcbots", "OnWanderNodeReached: [WSG] Alliance flag dist: {}", me->GetExactDist(go));
                             if (me->IsMounted())
                                 DismountBot();
                             bg->EventBotClickedOnFlag(me, go);
@@ -18549,8 +18550,8 @@ void bot_ai::OnWanderNodeReached()
                         if (already_used)
                             break;
 
-                        //TC_LOG_ERROR("npcbots", "OnWanderNodeReached: [AB] Bot %s USES flag %s at node %u",
-                        //    me->GetName().c_str(), obj->GetName().c_str(), uint32(node));
+                        //TC_LOG_ERROR("npcbots", "OnWanderNodeReached: [AB] Bot {} USES flag {} at node {}",
+                        //    me->GetName(), obj->GetName(), uint32(node));
                         if (me->IsMounted())
                             DismountBot();
                         me->CastSpell(obj, SPELL_OPENING_FLAG);
@@ -18718,8 +18719,8 @@ void bot_ai::AfterBotOwnerEnterVehicle()
             ChooseVehicleForEncounter(creEntry, vehEntry);
             if (!creEntry)
             {
-                TC_LOG_DEBUG("scripts", "OnBotOwnerEnterVehicle: no vehicle selected for bot master veh %s!",
-                    master->GetVehicleCreatureBase()->GetName().c_str());
+                TC_LOG_DEBUG("scripts", "OnBotOwnerEnterVehicle: no vehicle selected for bot master veh {}!",
+                    master->GetVehicleCreatureBase()->GetName());
                 return;
             }
             Unit* veh = SpawnVehicle(creEntry, vehEntry);
@@ -18773,7 +18774,7 @@ void bot_ai::AfterBotOwnerEnterVehicle()
         }
     }
 
-    //TC_LOG_ERROR("scripts", "OnBotOwnerEnterVehicle: master not in vehicle or no veh found for bot %s!", me->GetName().c_str());
+    //TC_LOG_ERROR("scripts", "OnBotOwnerEnterVehicle: master not in vehicle or no veh found for bot {}!", me->GetName());
 }
 
 void bot_ai::OnBotOwnerEnterVehicle(Vehicle const* /*vehicle*/)
@@ -18933,8 +18934,8 @@ void bot_ai::ChooseVehicleForEncounter(uint32 &creEntry, uint32 &vehEntry) const
                 }
             }
 
-            TC_LOG_ERROR("scripts", "ChooseVehicleForEncounter: unhandled master vehicle creature %s (%u)",
-                master->GetVehicleBase()->GetName().c_str(), master->GetVehicleBase()->GetEntry());
+            TC_LOG_ERROR("scripts", "ChooseVehicleForEncounter: unhandled master vehicle creature {} ({})",
+                master->GetVehicleBase()->GetName(), master->GetVehicleBase()->GetEntry());
             return;
     }
 

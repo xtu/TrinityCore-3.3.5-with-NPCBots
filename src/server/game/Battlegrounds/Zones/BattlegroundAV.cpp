@@ -188,7 +188,7 @@ void BattlegroundAV::HandleKillUnit(Creature* unit, Player* killer)
 //npcbot
 void BattlegroundAV::HandleBotKillUnit(Creature* killer, Creature* victim)
 {
-    TC_LOG_DEBUG("bg.battleground", "bg_av HandleBotKillUnit %i", victim->GetEntry());
+    TC_LOG_DEBUG("bg.battleground", "bg_av HandleBotKillUnit {}", victim->GetEntry());
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
     uint32 entry = victim->GetEntry();
@@ -1014,7 +1014,7 @@ void BattlegroundAV::EventBotClickedOnFlag(Creature* bot, GameObject* target_obj
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
     int32 object = GetObjectType(target_obj->GetGUID());
-    TC_LOG_DEBUG("bg.battleground", "BG_AV bot is using gameobject %u with type %i", target_obj->GetEntry(), object);
+    TC_LOG_DEBUG("bg.battleground", "BG_AV bot is using gameobject {} with type {}", target_obj->GetEntry(), object);
     if (object < 0)
         return;
     switch (target_obj->GetEntry())
@@ -1120,10 +1120,10 @@ void BattlegroundAV::EventBotDefendsPoint(Creature* bot, uint32 object)
         EventBotAssaultsPoint(bot, object);
         return;
     }
-    TC_LOG_DEBUG("bg.battleground", "player defends point object: %i node: %i", object, node);
+    TC_LOG_DEBUG("bg.battleground", "player defends point object: {} node: {}", object, node);
     if (m_Nodes[node].PrevOwner != team)
     {
-        TC_LOG_ERROR("bg.battleground", "BG_AV: player defends point which doesn't belong to his team %i", node);
+        TC_LOG_ERROR("bg.battleground", "BG_AV: player defends point which doesn't belong to his team {}", node);
         return;
     }
 
@@ -1268,7 +1268,7 @@ void BattlegroundAV::EventBotAssaultsPoint(Creature* bot, uint32 object)
     BG_AV_Nodes node = GetNodeThroughObject(object);
     uint32 owner = m_Nodes[node].Owner; //maybe name it prevowner
     uint32 team  = GetBotTeam(bot->GetGUID());
-    TC_LOG_DEBUG("bg.battleground", "bg_av: player assaults point object %i node %i", object, node);
+    TC_LOG_DEBUG("bg.battleground", "bg_av: player assaults point object {} node {}", object, node);
     if (owner == team || team == m_Nodes[node].TotalOwner)
         return; //surely a gm used this object
 

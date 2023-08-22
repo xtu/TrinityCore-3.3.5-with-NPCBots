@@ -8497,7 +8497,7 @@ void Unit::Mount(uint32 mount, uint32 VehicleId, uint32 creatureEntry)
     {
         if (VehicleId)
         {
-            TC_LOG_ERROR("scripts", "NPCBot::Mount mounting %u, vehicle %u (%u)", mount, VehicleId, creatureEntry);
+            TC_LOG_ERROR("scripts", "NPCBot::Mount mounting {}, vehicle {} ({})", mount, VehicleId, creatureEntry);
             if (CreateVehicleKit(VehicleId, creatureEntry))
             {
                 // Send others that we now have a vehicle
@@ -8584,7 +8584,7 @@ void Unit::Dismount()
     //npcbot
     if (IsNPCBot() && GetVehicleKit())
     {
-        //TC_LOG_ERROR("scripts", "NPCBot::Dismount dismounting vehicle %u (base %u, cre %u)",
+        //TC_LOG_ERROR("scripts", "NPCBot::Dismount dismounting vehicle {} (base {}, cre {})",
         //    GetVehicleKit()->GetVehicleInfo()->m_ID, GetVehicleKit()->GetBase()->GetEntry(), GetVehicleKit()->GetCreatureEntry());
         data.Initialize(SMSG_PLAYER_VEHICLE_DATA, 8 + 4);
         data << GetPackGUID();

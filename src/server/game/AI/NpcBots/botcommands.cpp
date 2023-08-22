@@ -1,25 +1,27 @@
+#include "Bag.h"
 #include "bot_ai.h"
 #include "botdatamgr.h"
 #include "botdump.h"
 #include "botgearscore.h"
 #include "botmgr.h"
 #include "botwanderful.h"
-#include "Bag.h"
-#include "Chat.h"
 #include "CharacterCache.h"
+#include "Chat.h"
+#include "Containers.h"
 #include "Creature.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
-#include "Language.h"
 #include "GameClient.h"
 #include "Group.h"
 #include "Item.h"
+#include "Language.h"
 #include "Log.h"
 #include "Map.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "QueryPackets.h"
 #include "RBAC.h"
 #include "ScriptMgr.h"
 #include "SpellInfo.h"
@@ -30,7 +32,6 @@
 #include "World.h"
 #include "WorldDatabase.h"
 #include "WorldSession.h"
-#include "QueryPackets.h"
 
 /*
 Name: script_bot_commands
@@ -354,7 +355,7 @@ private:
             case 493: // Moonglade
                 return { 46, 60 };
             default:
-                TC_LOG_ERROR("scripts", "GetZoneLevels: no choice for zoneId %u", zoneId);
+                TC_LOG_ERROR("scripts", "GetZoneLevels: no choice for zoneId {}", zoneId);
                 return { 1, 60 };
         }
     }

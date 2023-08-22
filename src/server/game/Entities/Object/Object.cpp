@@ -2342,8 +2342,8 @@ int32 WorldObject::CalcSpellDuration(SpellInfo const* spellInfo) const
         if (bot && bot->IsNPCBot())
         {
             comboPoints = bot->ToCreature()->GetCreatureComboPoints();
-            //TC_LOG_ERROR("scripts", "CalcSpellDuration bot %s veh spell %u cp %u",
-            //    bot->GetName().c_str(), spellProto->Id, uint32(comboPoints));
+            //TC_LOG_ERROR("scripts", "CalcSpellDuration bot {} veh spell {} cp {}",
+            //    bot->GetName(), spellProto->Id, uint32(comboPoints));
         }
     }
     else

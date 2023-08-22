@@ -135,7 +135,7 @@ void GenerateBotCustomSpellProcs()
             {
                 if (spellEffectInfo.IsAura())
                 {
-                    TC_LOG_ERROR("scripts", "Bot spell %u has ProcFlags %u, but it's of non-proc aura type, needs a correction", spellInfo.Id, spellInfo.ProcFlags);
+                    TC_LOG_ERROR("scripts", "Bot spell {} has ProcFlags {}, but it's of non-proc aura type, needs a correction", spellInfo.Id, spellInfo.ProcFlags);
                     break;
                 }
             }
@@ -199,7 +199,7 @@ void GenerateBotCustomSpellProcs()
         botSpellProcOverrides[spellInfo.Id] = std::move(procEntry);
     }
 
-    TC_LOG_INFO("server.loading", ">> Bot spell proc overrides generated for %u spells", uint32(botSpellProcOverrides.size()));
+    TC_LOG_INFO("server.loading", ">> Bot spell proc overrides generated for {} spells", uint32(botSpellProcOverrides.size()));
 
 }
 
@@ -2081,7 +2081,7 @@ void GenerateBotCustomSpells()
         }
     }
 
-    TC_LOG_INFO("server.loading", ">> Bot spellInfo overrides generated for %u spells", uint32(botSpellInfoOverrides.size()));
+    TC_LOG_INFO("server.loading", ">> Bot spellInfo overrides generated for {} spells", uint32(botSpellInfoOverrides.size()));
 
     GenerateBotCustomSpellProcs();
 }

@@ -389,7 +389,7 @@ void BotMgr::LoadConfig(bool reload)
     {
         Optional<float> val = Trinity::StringTo<float>(toks[i]);
         if (val == std::nullopt)
-            TC_LOG_ERROR("server.loading", "NpcBot.Mult.Damage.Levels contains invalid float value '%s', set to default", std::string(toks[i]).c_str());
+            TC_LOG_ERROR("server.loading", "NpcBot.Mult.Damage.Levels contains invalid float value '{}', set to default", toks[i]);
         float fval = val.value_or(1.0f);
         RoundToInterval(fval, 0.1f, 10.f);
         _mult_dmg_levels.push_back(fval);
@@ -404,7 +404,7 @@ void BotMgr::LoadConfig(bool reload)
     {
         Optional<uint32> val = Trinity::StringTo<uint32>(toks2[i]);
         if (val == std::nullopt)
-            TC_LOG_ERROR("server.loading", "NpcBot.Mult.Damage.Levels contains invalid uint32 value '%s', set to default", std::string(toks2[i]).c_str());
+            TC_LOG_ERROR("server.loading", "NpcBot.Mult.Damage.Levels contains invalid uint32 value '{}', set to default", toks2[i]);
         uint32 uval = val.value_or(uint32(0));
         total_pct += uval;
         _botwanderer_pct_level_brackets[i] = uval;
@@ -419,14 +419,14 @@ void BotMgr::LoadConfig(bool reload)
         Optional<uint32> val = Trinity::StringTo<uint32>(toks3[i]);
         if (val == std::nullopt)
         {
-            TC_LOG_ERROR("server.loading", "NpcBot.WanderingBots.Continents.Maps contains invalid uint32 value '%s', skipped", std::string(toks3[i]).c_str());
+            TC_LOG_ERROR("server.loading", "NpcBot.WanderingBots.Continents.Maps contains invalid uint32 value '{}', skipped", toks3[i]);
             continue;
         }
         uint32 uval = val.value_or(uint32(0));
         MapEntry const* mapEntry = sMapStore.LookupEntry(uval);
         if (!mapEntry || !mapEntry->IsContinent())
         {
-            TC_LOG_ERROR("server.loading", "NpcBot.WanderingBots.Continents.Maps contains invalid continent map id '%u', skipped", uval);
+            TC_LOG_ERROR("server.loading", "NpcBot.WanderingBots.Continents.Maps contains invalid continent map id '{}', skipped", uval);
             continue;
         }
         _enabled_wander_node_maps.push_back(uval);
@@ -474,7 +474,7 @@ void BotMgr::ResolveConfigConflicts()
     if (uint8 interFlags = (_noDpsTargetIconFlags & dpsFlags))
     {
         _noDpsTargetIconFlags &= ~interFlags;
-        TC_LOG_ERROR("server.loading", "BotMgr::LoadConfig: NoDPSTargetIconMask intersects with dps targets flags 0x%02X! Removed, new mask: 0x%02X",
+        TC_LOG_ERROR("server.loading", "BotMgr::LoadConfig: NoDPSTargetIconMask intersects with dps targets flags 0x{}2X! Removed, new mask: 0x{}2X",
             uint32(interFlags), uint32(_noDpsTargetIconFlags));
     }
 
@@ -494,7 +494,7 @@ void BotMgr::ResolveConfigConflicts()
                 uint32 pct = _botwanderer_pct_level_brackets[j];
                 _botwanderer_pct_level_brackets[minbotlevel / 10] += pct;
                 _botwanderer_pct_level_brackets[j] = 0;
-                TC_LOG_WARN("server.loading", "NpcBot.WanderingBots.Continents.Levels conflicts with NpcBot.WanderingBots.Continents.Maps: no map for levels %u-%u! Transferring extra %u%% to levels %u-%u",
+                TC_LOG_WARN("server.loading", "NpcBot.WanderingBots.Continents.Levels conflicts with NpcBot.WanderingBots.Continents.Maps: no map for levels {}-{}! Transferring extra {}{} to levels {}-{}",
                     uint32(j ? j * 10 : 1), uint32(j * 10 + 9), pct, std::max<uint32>(minbotlevel / 10 * 10, 1), uint32(minbotlevel / 10 * 10 + 9));
             }
         }
@@ -505,7 +505,7 @@ void BotMgr::ResolveConfigConflicts()
                 uint32 pct = _botwanderer_pct_level_brackets[i];
                 _botwanderer_pct_level_brackets[maxbotlevel / 10] += pct;
                 _botwanderer_pct_level_brackets[i] = 0;
-                TC_LOG_WARN("server.loading", "NpcBot.WanderingBots.Continents.Levels conflicts with NpcBot.WanderingBots.Continents.Maps: no map for levels %u-%u! Transferring extra %u%% to levels %u-%u",
+                TC_LOG_WARN("server.loading", "NpcBot.WanderingBots.Continents.Levels conflicts with NpcBot.WanderingBots.Continents.Maps: no map for levels {}-{}! Transferring extra {}{} to levels {}-{}",
                     uint32(i ? i * 10 : 1), uint32(i * 10 + 9), pct, std::max<uint32>(maxbotlevel, 1), uint32(maxbotlevel + 9));
             }
         }
@@ -1337,8 +1337,8 @@ void BotMgr::_teleportBot(Creature* bot, Map* newMap, float x, float y, float z,
                         bg->AddPlayerToResurrectQueue(shGuid, bot->GetGUID());
                     else
                     {
-                        TC_LOG_ERROR("npcbots", "TeleportBot: Bot %u '%s' can't find SpiritHealer in bg %s!",
-                            bot->GetEntry(), bot->GetName().c_str(), bg->GetName().c_str());
+                        TC_LOG_ERROR("npcbots", "TeleportBot: Bot {} '{}' can't find SpiritHealer in bg {}!",
+                            bot->GetEntry(), bot->GetName(), bg->GetName());
                     }
                 }
             }
@@ -1656,9 +1656,9 @@ bool BotMgr::RemoveBotFromGroup(Creature* bot)
 
     //debug
     //if (gr->RemoveMember(bot->GetGUID()))
-    //    TC_LOG_ERROR("entities.player", "RemoveBotFromGroup(): bot %s removed from group", bot->GetName().c_str());
+    //    TC_LOG_ERROR("entities.player", "RemoveBotFromGroup(): bot {} removed from group", bot->GetName());
     //else
-    //    TC_LOG_ERROR("entities.player", "RemoveBotFromGroup(): RemoveMember() returned FALSE on bot %s", bot->GetName().c_str());
+    //    TC_LOG_ERROR("entities.player", "RemoveBotFromGroup(): RemoveMember() returned FALSE on bot {}", bot->GetName());
 
     gr->RemoveMember(bot->GetGUID());
 
@@ -1805,7 +1805,7 @@ uint8 BotMgr::GetBotPlayerClass(uint8 bot_class)
             case BOT_CLASS_CRYPT_LORD:
                 return BOT_CLASS_WARRIOR;
             default:
-                TC_LOG_ERROR("npcbots", "GetPlayerClass: unknown Ex bot class %u!", bot_class);
+                TC_LOG_ERROR("npcbots", "GetPlayerClass: unknown Ex bot class {}!", bot_class);
                 return BOT_CLASS_PALADIN;
         }
     }
@@ -1838,7 +1838,7 @@ uint8 BotMgr::GetBotPlayerRace(uint8 bot_class, uint8 bot_race)
             case BOT_CLASS_CRYPT_LORD:
                 return RACE_UNDEAD_PLAYER;
             default:
-                TC_LOG_ERROR("npcbots", "GetBotPlayerRace: unknown Ex bot class %u!", bot_class);
+                TC_LOG_ERROR("npcbots", "GetBotPlayerRace: unknown Ex bot class {}!", bot_class);
                 return RACE_HUMAN;
         }
     }
@@ -2423,8 +2423,8 @@ int32 BotMgr::GetHPSTaken(Unit const* unit) const
                 else
                     amount += int32(healing / (std::max<int32>(spell->GetTimer(), 1000) * 0.001f));
 
-                //TC_LOG_ERROR("entities.player", "BotMgr:pendingHeals: found %s's %s on %s in %u (%i, total %i)",
-                //    u->GetName().c_str(), spellInfo->SpellName[0], target->GetName().c_str(), pheal->delay, healing, pheal->amount);
+                //TC_LOG_ERROR("entities.player", "BotMgr:pendingHeals: found {}'s {} on {} in {} ({}, total {})",
+                //    u->GetName(), spellInfo->SpellName[0], target->GetName(), pheal->delay, healing, pheal->amount);
             }
 
             break;
@@ -2437,7 +2437,7 @@ int32 BotMgr::GetHPSTaken(Unit const* unit) const
         amount += int32((*itr)->GetAmount() / ((*itr)->GetAmplitude() * 0.001f));
 
     //if (amount != 0)
-    //    TC_LOG_ERROR("entities.player", "BotMgr:GetHPSTaken(): %s got %i)", unit->GetName().c_str(), amount);
+    //    TC_LOG_ERROR("entities.player", "BotMgr:GetHPSTaken(): {} got {})", unit->GetName(), amount);
 
     return amount;
 }
@@ -2771,8 +2771,8 @@ void BotMgr::InviteBotToBG(ObjectGuid botguid, GroupQueueInfo* ginfo, Battlegrou
     ASSERT(bot);
 
     bg->IncreaseInvitedCount(ginfo->Team);
-    //TC_LOG_INFO("npcbots", "Battleground: invited NPCBot %u to BG instance %u bgtype %u '%s'",
-    //    botguid.GetEntry(), bg->GetInstanceID(), bg->GetTypeID(), bg->GetName().c_str());
+    //TC_LOG_INFO("npcbots", "Battleground: invited NPCBot {} to BG instance {} bgtype {} '{}'",
+    //    botguid.GetEntry(), bg->GetInstanceID(), bg->GetTypeID(), bg->GetName());
 }
 
 bool BotMgr::IsBotInAreaTriggerRadius(Creature const* bot, AreaTriggerEntry const* trigger)
