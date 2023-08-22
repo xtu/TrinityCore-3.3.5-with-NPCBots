@@ -939,10 +939,10 @@ uint32 BattlegroundAV::GetObjectThroughNode(BG_AV_Nodes node)
 uint32 BattlegroundAV::GetObjectThroughNode(BG_AV_Nodes node, bool log) const
 //end npcbot
 { //this function is the counterpart to GetNodeThroughObject()
-    TC_LOG_DEBUG("bg.battleground", "bg_AV GetObjectThroughNode {}", node);
     //npcbot
     if (log)
     //end npcbot
+    TC_LOG_DEBUG("bg.battleground", "bg_AV GetObjectThroughNode {}", node);
     if (m_Nodes[node].Owner == ALLIANCE)
     {
         if (m_Nodes[node].State == POINT_ASSAULTED)
