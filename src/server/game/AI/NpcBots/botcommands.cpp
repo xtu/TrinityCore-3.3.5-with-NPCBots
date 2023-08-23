@@ -721,7 +721,7 @@ public:
         });
         std::string val_str = ss.str();
         val_str.resize(val_str.size() - 1u);
-        trans->PAppend(val_str.c_str());
+        trans->Append(val_str);
         WorldDatabase.CommitTransaction(trans);
 
         handler->SendSysMessage("Saved.");
