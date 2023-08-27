@@ -721,7 +721,7 @@ public:
         });
         std::string val_str = ss.str();
         val_str.resize(val_str.size() - 1u);
-        trans->PAppend("%s", val_str.c_str());
+        trans->PAppend("{}", val_str.c_str());
         WorldDatabase.CommitTransaction(trans);
 
         handler->SendSysMessage("Saved.");
@@ -862,7 +862,7 @@ public:
                 wpc->SetMaxPower(POWER_MANA, uint32(uwp->GetLinks().size()));
                 wpc->SetFullPower(POWER_MANA);
             }
-            trans->PAppend("UPDATE creature_template_npcbot_wander_nodes SET links='%s' WHERE id=%u", uwp->FormatLinks().c_str(), uwp->GetWPId());
+            trans->PAppend("UPDATE creature_template_npcbot_wander_nodes SET links='{}' WHERE id={}", uwp->FormatLinks().c_str(), uwp->GetWPId());
         });
         WorldDatabase.DirectCommitTransaction(trans);
     }
@@ -940,7 +940,7 @@ public:
             if (Creature* creature = wp->GetCreature())
                 if (creature->GetLevel() != minl)
                     creature->SetLevel(minl);
-            WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET minlevel=%u, maxlevel=%u WHERE id=%u",
+            WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET minlevel={}, maxlevel={} WHERE id={}",
                 uint32(minl), uint32(maxl), wp->GetWPId());
         });
 
@@ -983,7 +983,7 @@ public:
             if (creature->GetLevel() != *minlevel)
                 creature->SetLevel(*minlevel);
 
-        WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET minlevel=%u, maxlevel=%u WHERE id=%u",
+        WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET minlevel={}, maxlevel={} WHERE id={}",
             uint32(*minlevel), uint32(*maxlevel), wpId);
 
         return true;
@@ -1014,7 +1014,7 @@ public:
                 handler->PSendSysMessage("Adding WP %u '%s' flag %u", wpId, wp->GetName().c_str(), uint32(flags));
                 const_cast<WanderNode*>(wp)->SetFlags(BotWPFlags(flags));
             }
-            WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET flags=%u WHERE id=%u", wp->GetFlags(), wpId);
+            WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET flags={} WHERE id={}", wp->GetFlags(), wpId);
         });
 
         return true;
@@ -1052,7 +1052,7 @@ public:
             wp->SetFlags(BotWPFlags(*flags));
         }
 
-        WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET flags=%u WHERE id=%u", wp->GetFlags(), wpId);
+        WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET flags={} WHERE id={}", wp->GetFlags(), wpId);
 
         return true;
     }
@@ -1081,7 +1081,7 @@ public:
         handler->PSendSysMessage("Changing WP %u '%s' name to '%s'", wpId, wp->GetName().c_str(), newname->c_str());
         wp->SetName(*newname);
 
-        WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET name='%s' WHERE id=%u", wp->GetName().c_str(), wpId);
+        WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET name='{}' WHERE id={}", wp->GetName().c_str(), wpId);
 
         return true;
     }
@@ -1111,7 +1111,7 @@ public:
         if (Creature* creature = wp->GetCreature())
             creature->NearTeleportTo(*player);
 
-        WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET x=%f,y=%f,z=%f,o=%f WHERE id=%u",
+        WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET x={},y={},z={},o={} WHERE id={}",
             wp->m_positionX, wp->m_positionY, wp->m_positionZ, wp->GetOrientation(), wp->GetWPId());
 
         handler->PSendSysMessage("WP %u '%s' was successfully moved.", wp->GetWPId(), wp->GetName().c_str());
@@ -1234,7 +1234,7 @@ public:
             wpc->ToTempSummon()->DespawnOrUnsummon();
         WanderNode::RemoveWP(wp);
 
-        WorldDatabase.PExecute("DELETE FROM creature_template_npcbot_wander_nodes WHERE id=%u", wpId);
+        WorldDatabase.PExecute("DELETE FROM creature_template_npcbot_wander_nodes WHERE id={}", wpId);
 
         handler->PSendSysMessage("WP %u '%s' was successfully deleted.", wpId, wpName.c_str());
 
@@ -3036,12 +3036,12 @@ public:
         uint32 modelId = can_change_appearance ? SoundSetModelsArray[RaceToRaceOffset[*race]][*gender][soundset ? *soundset - 1 : urand(0u, 2u)] : 0;
 
         uint32 newentry = 0;
-        QueryResult creres = WorldDatabase.PQuery("SELECT entry FROM creature_template WHERE entry = %u", BOT_ENTRY_CREATE_BEGIN);
+        QueryResult creres = WorldDatabase.PQuery("SELECT entry FROM creature_template WHERE entry = {}", BOT_ENTRY_CREATE_BEGIN);
         if (!creres)
             newentry = BOT_ENTRY_CREATE_BEGIN;
         else
         {
-            creres = WorldDatabase.PQuery("SELECT MIN(entry) FROM creature_template WHERE entry >= %u AND entry IN (SELECT entry FROM creature_template) AND entry+1 NOT IN (SELECT entry FROM creature_template)", BOT_ENTRY_CREATE_BEGIN);
+            creres = WorldDatabase.PQuery("SELECT MIN(entry) FROM creature_template WHERE entry >= {} AND entry IN (SELECT entry FROM creature_template) AND entry+1 NOT IN (SELECT entry FROM creature_template)", BOT_ENTRY_CREATE_BEGIN);
             ASSERT(creres);
             Field* field = creres->Fetch();
             newentry = field[0].GetUInt32() + 1;
@@ -3049,16 +3049,16 @@ public:
 
         WorldDatabaseTransaction trans = WorldDatabase.BeginTransaction();
         trans->Append("DROP TEMPORARY TABLE IF EXISTS creature_template_temp_npcbot_create");
-        trans->PAppend("CREATE TEMPORARY TABLE creature_template_temp_npcbot_create ENGINE=MEMORY SELECT * FROM creature_template WHERE entry = (SELECT entry FROM creature_template_npcbot_extras WHERE class = %u LIMIT 1)", uint32(*bclass));
-        trans->PAppend("UPDATE creature_template_temp_npcbot_create SET entry = %u, name = \"%s\"", newentry, namestr.c_str());
+        trans->PAppend("CREATE TEMPORARY TABLE creature_template_temp_npcbot_create ENGINE=MEMORY SELECT * FROM creature_template WHERE entry = (SELECT entry FROM creature_template_npcbot_extras WHERE class = {} LIMIT 1)", uint32(*bclass));
+        trans->PAppend("UPDATE creature_template_temp_npcbot_create SET entry = {}, name = \"{}\"", newentry, namestr.c_str());
         if (modelId)
-            trans->PAppend("UPDATE creature_template_temp_npcbot_create SET modelid1 = %u", modelId);
+            trans->PAppend("UPDATE creature_template_temp_npcbot_create SET modelid1 = {}", modelId);
         trans->Append("INSERT INTO creature_template SELECT * FROM creature_template_temp_npcbot_create");
         trans->Append("DROP TEMPORARY TABLE creature_template_temp_npcbot_create");
-        trans->PAppend("REPLACE INTO creature_template_npcbot_extras VALUES (%u, %u, %u)", newentry, uint32(*bclass), uint32(*race));
-        trans->PAppend("REPLACE INTO creature_equip_template SELECT %u, 1, ids.itemID1, ids.itemID2, ids.itemID3, -1 FROM (SELECT itemID1, itemID2, itemID3 FROM creature_equip_template WHERE CreatureID = (SELECT entry FROM creature_template_npcbot_extras WHERE class = %u LIMIT 1)) ids", newentry, uint32(*bclass));
+        trans->PAppend("REPLACE INTO creature_template_npcbot_extras VALUES ({}, {}, {})", newentry, uint32(*bclass), uint32(*race));
+        trans->PAppend("REPLACE INTO creature_equip_template SELECT {}, 1, ids.itemID1, ids.itemID2, ids.itemID3, -1 FROM (SELECT itemID1, itemID2, itemID3 FROM creature_equip_template WHERE CreatureID = (SELECT entry FROM creature_template_npcbot_extras WHERE class = {} LIMIT 1)) ids", newentry, uint32(*bclass));
         if (can_change_appearance)
-            trans->PAppend("REPLACE INTO creature_template_npcbot_appearance VALUES (%u, \"%s\", %u, %u, %u, %u, %u, %u)",
+            trans->PAppend("REPLACE INTO creature_template_npcbot_appearance VALUES ({}, \"{}\", {}, {}, {}, {}, {}, {})",
                 newentry, namestr.c_str(), uint32(*gender), uint32(*skin), uint32(*face), uint32(*hairstyle), uint32(*haircolor), uint32(*features));
         WorldDatabase.DirectCommitTransaction(trans);
 
