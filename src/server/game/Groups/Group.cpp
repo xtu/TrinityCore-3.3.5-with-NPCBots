@@ -479,7 +479,7 @@ bool Group::AddMember(Creature* creature)
         bool groupFound = false;
         for (; subGroup < MAX_RAID_SUBGROUPS; ++subGroup)
         {
-            if (m_subGroupsCounts[subGroup] < MAXGROUPSIZE)
+            if (m_subGroupsCounts[subGroup] < MAX_GROUP_SIZE)
             {
                 groupFound = true;
                 break;
@@ -512,7 +512,7 @@ bool Group::AddMember(Creature* creature)
 
     if (!isRaidGroup())
     {
-        for (uint8 i = 0; i < TARGETICONCOUNT; ++i)
+        for (uint8 i = 0; i < TARGET_ICONS_COUNT; ++i)
             m_targetIcons[i].Clear();
     }
 
