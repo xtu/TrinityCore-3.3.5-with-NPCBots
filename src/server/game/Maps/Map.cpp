@@ -3774,8 +3774,8 @@ void Map::AddToActive(WorldObject* obj)
         if (getNGrid(p.x_coord, p.y_coord))
             getNGrid(p.x_coord, p.y_coord)->incUnloadActiveLock();
         //npcbot
-        else if (c->IsNPCBot())
-            EnsureGridLoadedForActiveObject(Cell(Trinity::ComputeCellCoord(c->GetPositionX(), c->GetPositionY())), c);
+        else if (obj->IsNPCBot())
+            EnsureGridLoadedForActiveObject(Cell(Trinity::ComputeCellCoord(obj->GetPositionX(), obj->GetPositionY())), obj);
         //end npcbot
         else
         {
@@ -3797,6 +3797,11 @@ void Map::RemoveFromActive(WorldObject* obj)
             if (Creature* creature = obj->ToCreature(); !creature->IsPet() && creature->GetSpawnId())
             {
                 respawnLocation.emplace();
+                //npcbot: prevent crash from accessing deleted creatureData
+                if (creature->IsNPCBot())
+                    creature->GetHomePosition().GetPosition(respawnLocation->m_positionX, respawnLocation->m_positionY, respawnLocation->m_positionZ);
+                else
+                //end npcbot
                 creature->GetRespawnPosition(respawnLocation->m_positionX, respawnLocation->m_positionY, respawnLocation->m_positionZ);
             }
             break;
@@ -3814,16 +3819,11 @@ void Map::RemoveFromActive(WorldObject* obj)
     if (respawnLocation)
     {
         GridCoord p = Trinity::ComputeGridCoord(respawnLocation->GetPositionX(), respawnLocation->GetPositionY());
-        //npcbot: prevent crash from accessing deleted creatureData
-        if (c->IsNPCBot())
-            c->GetHomePosition().GetPosition(x, y, z);
-        else
-        //end npcbot
         if (getNGrid(p.x_coord, p.y_coord))
             getNGrid(p.x_coord, p.y_coord)->decUnloadActiveLock();
         //npcbot
-        else if (c->IsNPCBot())
-            EnsureGridLoaded(Cell(Trinity::ComputeCellCoord(c->GetPositionX(), c->GetPositionY())));
+        else if (obj->IsNPCBot())
+            EnsureGridLoaded(Cell(Trinity::ComputeCellCoord(obj->GetPositionX(), obj->GetPositionY())));
         //end npcbot
         else
         {
