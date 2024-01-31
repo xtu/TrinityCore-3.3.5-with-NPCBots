@@ -2883,7 +2883,14 @@ void SpellInfo::_LoadImmunityInfo()
             || !immuneInfo.AuraTypeImmune.empty()
             || !immuneInfo.SpellEffectImmune.empty())
         {
+            //npcbot
+            /*
+            //end npcbot
             effect._immunityInfo = std::move(workBuffer);
+            //npcbot
+            */
+            effect._immunityInfo = workBuffer.release();
+            //end npcbot
             workBuffer = std::make_unique<SpellEffectInfo::ImmunityInfo>();
         }
 
