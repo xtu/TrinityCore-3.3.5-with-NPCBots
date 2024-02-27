@@ -1135,8 +1135,8 @@ void BattlegroundAV::EventBotDefendsPoint(Creature* bot, uint32 object)
 
     if (!IsTower(node))
     {
-        SpawnBGObject(BG_AV_OBJECT_AURA_N_FIRSTAID_STATION+3*node, RESPAWN_ONE_DAY);
-        SpawnBGObject(BG_AV_OBJECT_AURA_A_FIRSTAID_STATION+GetTeamIndexByTeamId(team)+3*node, RESPAWN_IMMEDIATELY);
+        SpawnBGObject(BG_AV_OBJECT_AURA_N_FIRSTAID_STATION + 3 * node, RESPAWN_ONE_DAY);
+        SpawnBGObject(BG_AV_OBJECT_AURA_A_FIRSTAID_STATION + uint32(GetTeamIndexByTeamId(team)) + 3 * node, RESPAWN_IMMEDIATELY);
     }
         // despawn old go
     SpawnBGObject(object, RESPAWN_ONE_DAY);
@@ -1332,8 +1332,8 @@ void BattlegroundAV::EventBotAssaultsPoint(Creature* bot, uint32 object)
         else
         {
             //spawning/despawning of aura
-            SpawnBGObject(BG_AV_OBJECT_AURA_N_FIRSTAID_STATION+3*node, RESPAWN_IMMEDIATELY); //neutral aura spawn
-            SpawnBGObject(BG_AV_OBJECT_AURA_A_FIRSTAID_STATION+GetTeamIndexByTeamId(owner)+3*node, RESPAWN_ONE_DAY); //teeamaura despawn
+            SpawnBGObject(BG_AV_OBJECT_AURA_N_FIRSTAID_STATION + 3 * node, RESPAWN_IMMEDIATELY); //neutral aura spawn
+            SpawnBGObject(BG_AV_OBJECT_AURA_A_FIRSTAID_STATION + uint32(GetTeamIndexByTeamId(owner)) + 3 * node, RESPAWN_ONE_DAY); //teeamaura despawn
 
             RelocateDeadPlayers(BgCreatures[node]);
         }
