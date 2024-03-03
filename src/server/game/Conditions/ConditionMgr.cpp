@@ -234,7 +234,7 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo) const
         {
             //npcbot
             if (object->IsNPCBot())
-                condMeets = object->ToCreature()->GetGender() == ConditionValue1;
+                condMeets = object->ToCreature()->GetGender() == Gender(ConditionValue1);
             else
             //end npcbot
             if (Player* player = object->ToPlayer())
