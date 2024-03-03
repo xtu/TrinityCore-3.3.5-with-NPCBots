@@ -52,8 +52,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include "Hacks/boost_1_74_fibonacci_heap.h"
-
 //npcbot
 #include "botdatamgr.h"
 #include "botmgr.h"
@@ -83,8 +81,6 @@ struct RespawnInfoWithHandle;
 struct RespawnListContainer : boost::heap::fibonacci_heap<RespawnInfoWithHandle*, boost::heap::compare<CompareRespawnInfo>>
 {
 };
-
-BOOST_1_74_FIBONACCI_HEAP_MSVC_COMPILE_FIX(RespawnListContainer::value_type)
 
 struct RespawnInfoWithHandle : RespawnInfo
 {
