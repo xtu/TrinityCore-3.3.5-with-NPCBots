@@ -17238,6 +17238,21 @@ bool bot_ai::GlobalUpdate(uint32 diff)
                 _UpdateWMOArea();
         }
 
+        //Meeting Stone
+        if (me->IsInWorld() && !IAmFree() && !me->IsInCombat() && !master->IsInCombat() && IsChanneling(master) && !CCed(me) && !IsCasting() && !me->GetVehicle())
+        {
+            if (Spell const* curMasterSpell = master->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+            {
+                if (curMasterSpell->m_spellInfo->Id == SUMMONING_STONE_EFFECT)
+                {
+                    if (GameObject* portal = master->GetGameObject(SUMMONING_STONE_EFFECT))
+                    {
+                        portal->Use(me);
+                    }
+                }
+            }
+        }
+
         //Gathering
         if (me->IsInWorld() && !IAmFree() && HasRole(BOT_ROLE_MASK_GATHERING) && !me->IsInCombat() && !master->IsInCombat() && !master->IsMounted() && !CCed(me) &&
             master->GetLootGUID().IsEmpty() && !me->isMoving() && !master->isMoving() && master->IsStandState() && !Feasting() && !IsCasting() && !IsCasting(master) &&
