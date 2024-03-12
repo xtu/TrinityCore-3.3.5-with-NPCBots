@@ -456,6 +456,7 @@ bool bot_ai::SetBotOwner(Player* newowner)
 
     master = newowner;
     _ownerGuid = newowner->GetGUID().GetCounter();
+    _checkOwershipTimer = BotMgr::GetOwnershipExpireTime() ? CalculateOwnershipCheckTime() : 0;
 
     ASSERT(me->IsInWorld());
     AbortTeleport();
@@ -466,6 +467,9 @@ void bot_ai::CheckOwnerExpiry()
 {
     if (!BotMgr::GetOwnershipExpireTime())
         return; //disabled
+
+    if (IsTempBot())
+        return;
 
     NpcBotData const* npcBotData = BotDataMgr::SelectNpcBotData(me->GetEntry());
     ASSERT(npcBotData, "bot_ai::CheckOwnerExpiry(): data not found!");
@@ -479,18 +483,28 @@ void bot_ai::CheckOwnerExpiry()
     ObjectGuid ownerGuid = ObjectGuid(HighGuid::Player, 0, npcBotData->owner);
     time_t timeNow = time(0);
     time_t expireTime = time_t(BotMgr::GetOwnershipExpireTime());
-    uint32 accId = sCharacterCache->GetCharacterAccountIdByGuid(ownerGuid);
-    QueryResult result = accId ? LoginDatabase.PQuery("SELECT UNIX_TIMESTAMP(last_login) FROM account WHERE id = {}", accId) : nullptr;
+    time_t baseTimeStamp;
 
-    Field* fields = result ? result->Fetch() : nullptr;
-    time_t lastLoginTime = fields ? time_t(fields[0].GetUInt32()) : timeNow;
+    if (BotMgr::GetOwnershipExpireMode() == BOT_OWNERSHIP_EXPIRE_OFFLINE)
+    {
+        uint32 accId = sCharacterCache->GetCharacterAccountIdByGuid(ownerGuid);
+        QueryResult result = accId ? CharacterDatabase.PQuery("SELECT MAX(logout_time) FROM characters WHERE account = {}", accId) : nullptr;
+
+        Field* fields = result ? result->Fetch() : nullptr;
+        time_t lastLoginTime = fields ? time_t(fields[0].GetUInt32()) : timeNow;
+        baseTimeStamp = lastLoginTime;
+    }
+    else //if (BotMgr::GetOwnershipExpireMode() == BOT_OWNERSHIP_EXPIRE_HIRE)
+    {
+        baseTimeStamp = time_t(npcBotData->hire_time);
+    }
 
     //either expired or owner does not exist
-    if (timeNow >= lastLoginTime + expireTime)
+    if (timeNow >= baseTimeStamp + expireTime)
     {
         std::string name = "unknown";
         sCharacterCache->GetCharacterNameByGuid(ownerGuid, name);
-        TC_LOG_DEBUG("server.loading", ">> {}'s (guid: {}) ownership over bot {} ({}) has expired!",
+        TC_LOG_DEBUG("npcbots", "{}'s (guid: {}) ownership over bot {} ({}) has expired!",
             name, npcBotData->owner, me->GetName(), me->GetEntry());
 
         //send all items back
@@ -540,6 +554,7 @@ void bot_ai::CheckOwnerExpiry()
         }
 
         //hard reset owner
+        _ownerGuid = 0;
         uint32 newOwner = 0;
         BotDataMgr::UpdateNpcBotData(me->GetEntry(), NPCBOT_UPDATE_OWNER, &newOwner);
         //...spec
@@ -548,6 +563,9 @@ void bot_ai::CheckOwnerExpiry()
         //...and roles
         uint32 roleMask = DefaultRolesForClass(npcBotExtra->bclass, spec);
         BotDataMgr::UpdateNpcBotData(me->GetEntry(), NPCBOT_UPDATE_ROLES, &roleMask);
+
+        if (Group* gr = GetGroup())
+            gr->RemoveMember(me->GetGUID());
     }
 }
 
@@ -572,14 +590,16 @@ void bot_ai::ResetBotAI(uint8 resetType)
     master = reinterpret_cast<Player*>(me);
     if (resetType & BOTAI_RESET_MASK_ABANDON_MASTER)
         _ownerGuid = 0;
-    if (resetType == BOTAI_RESET_INIT)
+    if (resetType == BOTAI_RESET_INIT || resetType == BOTAI_RESET_LOGOUT)
     {
-        homepos.Relocate(me);
-        if (!IsTempBot())
-            CheckOwnerExpiry();
+        NpcBotData const* npcBotData = BotDataMgr::SelectNpcBotData(me->GetEntry());
+        _checkOwershipTimer = (BotMgr::GetOwnershipExpireTime() && npcBotData->owner) ?
+            ((resetType == BOTAI_RESET_INIT || BotMgr::GetOwnershipExpireMode() == BOT_OWNERSHIP_EXPIRE_HIRE) ? 1000 : CalculateOwnershipCheckTime()) : 0;
+        if (resetType == BOTAI_RESET_INIT)
+            homepos.Relocate(me);
+        else //if (resetType == BOTAI_RESET_LOGOUT)
+            _saveStats();
     }
-    if (resetType == BOTAI_RESET_LOGOUT)
-        _saveStats();
 
     if (!IsWanderer() || BotMgr::IsWanderingWorldBot(me))
     {
@@ -14893,6 +14913,11 @@ void bot_ai::FindMaster()
     }
 }
 
+uint32 bot_ai::CalculateOwnershipCheckTime()
+{
+    return std::min<uint32>(BotMgr::GetOwnershipExpireTime(), urand(58 * MINUTE * IN_MILLISECONDS, 62 * MINUTE * IN_MILLISECONDS));
+}
+
 bool bot_ai::IAmFree() const
 {
     if (!_ownerGuid)
@@ -16853,6 +16878,26 @@ bool bot_ai::GlobalUpdate(uint32 diff)
             }
         }
     }
+    else
+    {
+        if (_checkOwershipTimer && _checkOwershipTimer <= diff)
+        {
+            if (IAmFree())
+            {
+                NpcBotData const* npcBotData = BotDataMgr::SelectNpcBotData(me->GetEntry());
+                if (npcBotData->owner != 0)
+                {
+                    CheckOwnerExpiry();
+                    if (npcBotData->owner == 0)
+                    {
+                        _checkOwershipTimer = 0;
+                        return false;
+                    }
+                }
+            }
+            _checkOwershipTimer = CalculateOwnershipCheckTime();
+        }
+    }
 
     //db saves with cd
     //  1) disabled spells
@@ -17530,6 +17575,7 @@ void bot_ai::CommonTimers(uint32 diff)
     if (roleTimer > diff)           roleTimer -= diff;
     if (ordersTimer > diff)         ordersTimer -= diff;
     if (checkMasterTimer > diff)    checkMasterTimer -= diff;
+    if (_checkOwershipTimer > diff) _checkOwershipTimer -= diff;
 
     if (_powersTimer > diff)        _powersTimer -= diff;
     if (_chaseTimer > diff)         _chaseTimer -= diff;
