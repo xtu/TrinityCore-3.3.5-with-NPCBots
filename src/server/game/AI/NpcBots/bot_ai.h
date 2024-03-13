@@ -64,6 +64,7 @@ class bot_ai : public CreatureAI
         void EnterEvadeMode(EvadeReason/* why*/ = EVADE_REASON_OTHER) override { }
         //void LeavingWorld() override { }
         void OnSpellStart(SpellInfo const* spellInfo) override { OnBotSpellStart(spellInfo); }
+        void OnDeath(Unit* attacker = nullptr);
         //bool CanRespawn() override { return IAmFree(); }
 
         virtual void OnBotSummon(Creature* /*summon*/) {}
@@ -690,6 +691,7 @@ class bot_ai : public CreatureAI
         uint32 _saveDisabledSpellsTimer;
 
         uint32 _lastZoneId, _lastAreaId, _lastWMOAreaId;
+        uint32 _selfrez_spell_id;
 
         uint8 _unreachableCount, _jumpCount, _evadeCount;
         uint8 _healHpPctThreshold;

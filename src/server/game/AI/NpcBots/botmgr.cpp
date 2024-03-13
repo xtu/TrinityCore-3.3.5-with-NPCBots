@@ -2463,6 +2463,11 @@ void BotMgr::OnBotWandererKilled(GameObject* go)
     }
 }
 
+void BotMgr::OnBotKilled(Creature const* bot, Unit* attacker/* = nullptr*/)
+{
+    bot->GetBotAI()->OnDeath(attacker);
+}
+
 void BotMgr::OnBotSpellInterrupt(Unit const* caster, CurrentSpellTypes spellType)
 {
     if (spellType == CURRENT_AUTOREPEAT_SPELL)
