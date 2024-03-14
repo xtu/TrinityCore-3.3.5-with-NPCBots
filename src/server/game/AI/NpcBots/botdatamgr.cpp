@@ -316,6 +316,8 @@ private:
             //force level range for bgs
             bot_template.minlevel = std::min<uint32>(bracketEntry->MinLevel, max_level);
             bot_template.maxlevel = std::min<uint32>(bracketEntry->MaxLevel, max_level);
+            if (sWorld->getBoolConfig(CONFIG_BG_XP_FOR_KILL))
+                bot_template.flags_extra &= ~(CREATURE_FLAG_EXTRA_NO_XP);
         }
         else
         {

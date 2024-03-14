@@ -446,6 +446,9 @@ class TC_GAME_API Battleground
         TeamId GetBotTeamId(ObjectGuid guid) const;
         TeamId GetOtherTeamId(TeamId teamId) const;
         void AddOrSetBotToCorrectBgGroup(Creature* bot, uint32 team);
+        void RewardXPAtKill(Player* killer, Creature* victim);
+        void RewardXPAtKill(Creature* killer, Player* victim);
+        void RewardXPAtKill(Creature* killer, Creature* victim);
         virtual void AddBot(Creature* bot);
         virtual void RemoveBotAtLeave(ObjectGuid guid);
         virtual WorldSafeLocsEntry const* GetClosestGraveyardForBot(WorldLocation const& curPos, uint32 team) const;

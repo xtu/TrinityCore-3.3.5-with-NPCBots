@@ -2557,6 +2557,9 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
         return;
 
     if (victim && victim->GetTypeId() == TYPEID_UNIT && !victim->ToCreature()->hasLootRecipient())
+    //npcbot
+        if (!(victim->IsNPCBot() && victim->FindMap() && victim->GetMap()->IsBattleground()))
+    //end npcbot
         return;
 
     uint8 level = GetLevel();
