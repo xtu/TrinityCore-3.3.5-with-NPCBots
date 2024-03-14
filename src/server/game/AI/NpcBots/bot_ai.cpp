@@ -12664,9 +12664,8 @@ void bot_ai::ApplyItemEnchantment(Item* item, EnchantmentSlot eslot, uint8 slot)
                     // Cast custom spell vs all equal basepoints got from enchant_amount
                     CastSpellExtraArgs args(item);
                     if (basepoints)
-                    {
-                        args.AddSpellBP0(basepoints);
-                    }
+                        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                            args.AddSpellMod(SpellValueMod(SPELLVALUE_BASE_POINT0 + i), basepoints);
                     me->CastSpell(me, enchant_spell_id, args);
                 }
                 break;
@@ -12930,9 +12929,8 @@ void bot_ai::ApplyItemEquipEnchantmentSpells(Item* item)
                     // Cast custom spell vs all equal basepoints got from enchant_amount
                     CastSpellExtraArgs args(item);
                     if (basepoints)
-                    {
-                        args.AddSpellBP0(basepoints);
-                    }
+                        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                            args.AddSpellMod(SpellValueMod(SPELLVALUE_BASE_POINT0 + i), basepoints);
                     me->CastSpell(me, enchant_spell_id, args);
                     break;
                 }
