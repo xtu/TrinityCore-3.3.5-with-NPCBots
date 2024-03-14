@@ -1980,7 +1980,7 @@ void BotDataMgr::CreateWanderingBotsSortedGear()
                 {
                     uint32 minlvl = std::max<uint32>(lstep * ITEM_SORTING_LEVEL_STEP, 1);
                     uint32 maxlvl = (lstep + 1) * ITEM_SORTING_LEVEL_STEP - 1;
-                    TC_LOG_WARN("server.loading", "No items for class {} slot {} at levels {}-{}!", c, s, minlvl, maxlvl);
+                    TC_LOG_DEBUG("npcbots", "No items for class {} slot {} at levels {}-{}!", c, s, minlvl, maxlvl);
                 }
             }
         }
