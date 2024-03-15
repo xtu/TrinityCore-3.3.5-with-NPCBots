@@ -146,6 +146,7 @@ class TC_GAME_API BotMgr
         static float GetBotWandererHealingMod();
         static float GetBotWandererHPMod();
         static float GetBotWandererSpeedMod();
+        static float GetBotWandererXPGainMod();
         static BotBrackets GetBotWandererLevelBrackets();
         static float GetBotDamageModByClass(uint8 botclass);
         static float GetBotDamageModByLevel(uint8 botlevel);
