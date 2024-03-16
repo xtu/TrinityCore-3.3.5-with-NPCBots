@@ -24,6 +24,7 @@
 #include "Loot.h"
 #include "SharedDefines.h"
 #include "Timer.h"
+#include "UniqueTrackablePtr.h"
 #include <map>
 
 class Battlefield;
@@ -352,6 +353,8 @@ class TC_GAME_API Group
         ObjectGuid const* GetTargetIcons() const { return m_targetIcons; }
         //end npcbots
 
+        Trinity::unique_weak_ptr<Group> GetWeakPtr() const { return m_scriptRef; }
+
     protected:
         bool _setMembersGroup(ObjectGuid guid, uint8 group);
         void _homebindIfInstance(Player* player);
@@ -390,5 +393,8 @@ class TC_GAME_API Group
         uint32              m_dbStoreId;                    // Represents the ID used in database (Can be reused by other groups if group was disbanded)
         bool                m_isLeaderOffline;
         TimeTracker         m_leaderOfflineTimer;
+
+        struct NoopGroupDeleter { void operator()(Group*) const { /*noop - not managed*/ } };
+        Trinity::unique_trackable_ptr<Group> m_scriptRef;
 };
 #endif
