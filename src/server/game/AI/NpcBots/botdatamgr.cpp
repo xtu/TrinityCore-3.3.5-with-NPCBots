@@ -1380,7 +1380,7 @@ bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unu
         {
             for (auto const& real_bg_pair : kv.second.m_Battlegrounds)
             {
-                Battleground const* real_bg = real_bg_pair.second;
+                Battleground const* real_bg = real_bg_pair.second.get();
                 if (real_bg->GetInstanceID() != 0 && real_bg->GetBracketId() == bracketId &&
                     real_bg->GetStatus() < STATUS_WAIT_LEAVE && real_bg->HasFreeSlots())
                 {
