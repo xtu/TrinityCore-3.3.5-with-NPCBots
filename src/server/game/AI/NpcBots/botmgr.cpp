@@ -52,6 +52,8 @@ uint8 _basefollowdist;
 uint8 _maxClassNpcBots;
 uint8 _xpReductionAmount;
 uint8 _xpReductionStartingNumber;
+uint8 _mountLevel60;
+uint8 _mountLevel100;
 uint8 _healTargetIconFlags;
 uint8 _tankingTargetIconFlags;
 uint8 _offTankingTargetIconFlags;
@@ -287,6 +289,8 @@ void BotMgr::LoadConfig(bool reload)
     _basefollowdist                 = sConfigMgr->GetIntDefault("NpcBot.BaseFollowDistance", 30);
     _xpReductionAmount              = sConfigMgr->GetIntDefault("NpcBot.XpReduction.Amount", 0);
     _xpReductionStartingNumber      = sConfigMgr->GetIntDefault("NpcBot.XpReduction.StartingNumber", 2);
+    _mountLevel60                   = sConfigMgr->GetIntDefault("NpcBot.MountLevel.60", 20);
+    _mountLevel100                  = sConfigMgr->GetIntDefault("NpcBot.MountLevel.100", 40);
     _healTargetIconFlags            = sConfigMgr->GetIntDefault("NpcBot.HealTargetIconMask", 0);
     _tankingTargetIconFlags         = sConfigMgr->GetIntDefault("NpcBot.TankTargetIconMask", 0);
     _offTankingTargetIconFlags      = sConfigMgr->GetIntDefault("NpcBot.OffTankTargetIconMask", 0);
@@ -492,6 +496,7 @@ void BotMgr::LoadConfig(bool reload)
     }
 
     //limits
+    _mountLevel100 = std::max<uint8>(_mountLevel100, _mountLevel60);
     RoundToInterval(_mult_dmg_physical, 0.1f, 10.f);
     RoundToInterval(_mult_dmg_spell, 0.1f, 10.f);
     RoundToInterval(_mult_healing, 0.1f, 10.f);
@@ -880,6 +885,15 @@ uint8 BotMgr::GetNpcBotXpReduction()
 uint8 BotMgr::GetNpcBotXpReductionStartingNumber()
 {
     return _xpReductionStartingNumber;
+}
+
+uint8 BotMgr::GetNpcBotMountLevel60()
+{
+    return _mountLevel60;
+}
+uint8 BotMgr::GetNpcBotMountLevel100()
+{
+    return _mountLevel100;
 }
 
 uint8 BotMgr::GetMaxNpcBots(uint8 level)
