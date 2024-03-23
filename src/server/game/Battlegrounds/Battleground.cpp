@@ -151,7 +151,6 @@ Battleground::~Battleground()
     for (uint32 i = 0; i < size; ++i)
         DelObject(i);
 
-    sBattlegroundMgr->RemoveBattleground(GetTypeID(), GetInstanceID());
     // unload map
     if (m_Map)
     {
@@ -2071,6 +2070,7 @@ void Battleground::HandleBotKillPlayer(Creature* killer, Player* victim)
     {
         // To be able to remove insignia -- ONLY IN Battlegrounds
         victim->SetUnitFlag(UNIT_FLAG_SKINNABLE);
+        RewardXPAtKill(killer, victim);
     }
 }
 void Battleground::HandleBotKillBot(Creature* killer, Creature* victim)
@@ -2100,6 +2100,8 @@ void Battleground::HandleBotKillBot(Creature* killer, Creature* victim)
                 UpdateBotScore(teamedBot, SCORE_HONORABLE_KILLS, 1);
         }
     }
+    if (!isArena() && !victim->GetLootRecipient()) // Prevent double reward (AI->KilledUnit (killing blow) and Unit::Kill (recipient))
+        RewardXPAtKill(killer, victim);
 }
 void Battleground::HandlePlayerKillBot(Creature* victim, Player* killer)
 {
@@ -2131,6 +2133,8 @@ void Battleground::HandlePlayerKillBot(Creature* victim, Player* killer)
                 UpdateBotScore(teamedBot, SCORE_HONORABLE_KILLS, 1);
         }
     }
+    if (!isArena())
+        RewardXPAtKill(killer, victim);
 }
 
 TeamId Battleground::GetOtherTeamId(TeamId teamId) const
@@ -2293,6 +2297,74 @@ void Battleground::RewardXPAtKill(Player* killer, Player* victim)
     if (sWorld->getBoolConfig(CONFIG_BG_XP_FOR_KILL) && killer && victim)
         killer->RewardPlayerAndGroupAtKill(victim, true);
 }
+
+//npcbot
+void Battleground::RewardXPAtKill(Player* killer, Creature* victim)
+{
+    if (sWorld->getBoolConfig(CONFIG_BG_XP_FOR_KILL) && killer && victim)
+        killer->RewardPlayerAndGroupAtKill(victim, true);
+}
+
+void Battleground::RewardXPAtKill(Creature* killer, Player* victim)
+{
+    if (sWorld->getBoolConfig(CONFIG_BG_XP_FOR_KILL) && killer && victim)
+    {
+        Player* pkiller = killer->IsFreeBot() ? nullptr : killer->GetBotOwner();
+        if (!pkiller)
+        {
+            uint32 team = (BotDataMgr::GetTeamIdForFaction(killer->GetFaction()) == TEAM_ALLIANCE) ? ALLIANCE : HORDE;
+            if (Group const* group = GetBgRaid(team))
+            {
+                float mindist = SIZE_OF_GRIDS;
+                for (GroupReference const* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+                {
+                    if (Player* gPlayer = itr->GetSource())
+                    {
+                        float dist = gPlayer->GetExactDist2d(victim);
+                        if (dist < mindist)
+                        {
+                            mindist = dist;
+                            pkiller = gPlayer;
+                        }
+                    }
+                }
+            }
+        }
+        if (pkiller && pkiller->IsAtGroupRewardDistance(victim))
+            pkiller->RewardPlayerAndGroupAtKill(victim, true);
+    }
+}
+
+void Battleground::RewardXPAtKill(Creature* killer, Creature* victim)
+{
+    if (sWorld->getBoolConfig(CONFIG_BG_XP_FOR_KILL) && killer && victim)
+    {
+        Player* pkiller = killer->IsFreeBot() ? nullptr : killer->GetBotOwner();
+        if (!pkiller)
+        {
+            uint32 team = (BotDataMgr::GetTeamIdForFaction(killer->GetFaction()) == TEAM_ALLIANCE) ? ALLIANCE : HORDE;
+            if (Group const* group = GetBgRaid(team))
+            {
+                float mindist = SIZE_OF_GRIDS;
+                for (GroupReference const* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+                {
+                    if (Player* gPlayer = itr->GetSource())
+                    {
+                        float dist = gPlayer->GetExactDist2d(victim);
+                        if (dist < mindist)
+                        {
+                            mindist = dist;
+                            pkiller = gPlayer;
+                        }
+                    }
+                }
+            }
+        }
+        if (pkiller && pkiller->IsAtGroupRewardDistance(victim))
+            pkiller->RewardPlayerAndGroupAtKill(victim, true);
+    }
+}
+//end npcbot
 
 uint32 Battleground::GetTeamScore(uint32 teamId) const
 {

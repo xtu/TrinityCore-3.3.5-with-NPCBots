@@ -420,7 +420,6 @@ void Spell::EffectSchoolDMG()
                     {
                         // Calculate damage of Immolate/Shadowflame tick
                         int32 pdamage = aura->GetAmount();
-                        pdamage = unitTarget->SpellDamageBonusTaken(unitCaster, aura->GetSpellInfo(), pdamage, DOT);
 
                         // And multiply by amount of ticks to get damage potential
                         pdamage *= aura->GetSpellInfo()->GetMaxTicks();
@@ -434,7 +433,6 @@ void Spell::EffectSchoolDMG()
                         ASSERT(m_spellInfo->GetMaxTicks() > 0);
                         m_spellValue->EffectBasePoints[EFFECT_1] = dotBasePoints / m_spellInfo->GetMaxTicks();
 
-                        apply_direct_bonus = false;
                         // Glyph of Conflagrate
                         if (!unitCaster->HasAura(56235))
                             unitTarget->RemoveAurasDueToSpell(aura->GetId(), unitCaster->GetGUID());
@@ -1967,6 +1965,11 @@ void Spell::EffectOpenLock()
                     bg->EventBotClickedOnFlag(bot, gameObjTarget);
                 return;
             }
+        }
+        else if (botGoInfo->type == GAMEOBJECT_TYPE_TRAP)
+        {
+            gameObjTarget->SetLootState(GO_ACTIVATED);
+            return;
         }
 
         return;
